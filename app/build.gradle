@@ -13,8 +13,19 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            zipAlignEnabled true
+            debuggable false
+            jniDebuggable false
+        }
+        debug {
+            minifyEnabled false
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            zipAlignEnabled true
+            debuggable true
         }
     }
 }
@@ -24,4 +35,14 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.2.1'
     compile 'com.android.support:design:23.2.1'
+    compile 'com.android.support:cardview-v7:23.2.0'
+    compile 'com.android.support:recyclerview-v7:23.2.0'
+    compile 'com.github.paolorotolo:appintro:3.4.0'
+    compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.squareup.okhttp:okhttp:2.5.0'
+    compile 'com.github.d-max:spots-dialog:0.4@aar'
+
+    //compile 'com.albinmathew:PreLollipopTransition:1.1.2'
+    compile 'com.andkulikov:transitionseverywhere:1.6.0'
+
 }

@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="transitionseverywhere-1.6.0">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/app/build/intermediates/exploded-aar/com.andkulikov/transitionseverywhere/1.6.0/jars/classes.jar!/" />
+      <root url="file://$PROJECT_DIR$/app/build/intermediates/exploded-aar/com.andkulikov/transitionseverywhere/1.6.0/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.andkulikov/transitionseverywhere/1.6.0/8878bc8d26b400d124fa2112316273e8b8cbdbc4/transitionseverywhere-1.6.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
