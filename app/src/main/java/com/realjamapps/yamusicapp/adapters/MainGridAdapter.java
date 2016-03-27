@@ -2,7 +2,9 @@ package com.realjamapps.yamusicapp.adapters;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.facebook.drawee.view.SimpleDraweeView;
 import com.realjamapps.yamusicapp.R;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.NetworkPolicy;
@@ -20,6 +23,7 @@ import com.squareup.picasso.Picasso;
 import com.realjamapps.yamusicapp.models.Performer;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainGridAdapter extends RecyclerView.Adapter<MainGridAdapter.ViewHolder> {
 
@@ -33,35 +37,37 @@ public class MainGridAdapter extends RecyclerView.Adapter<MainGridAdapter.ViewHo
         this.mItems = listData;
     }
 
-    protected void refresh(ArrayList<Performer> listData) {
+    public void refresh(ArrayList<Performer> listData) {
         this.mItems = listData;
-        System.gc();
+        //System.gc();
         notifyDataSetChanged();
     }
 
-    protected void clear() {
+    public void clear() {
         mItems.clear();
         notifyDataSetChanged();
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.grid_item, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.grid_item_test, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) { //final here
+    public void onBindViewHolder(final ViewHolder holder, int position) {
 
-        final Performer item = mItems.get(position); //final here
+        final Performer performer = mItems.get(position);
 
-       /* Picasso.with(mContext)
-                .load(item.getmImageUrl())
+        Uri uri = Uri.parse(performer.getmCoverBig());
+
+        holder.draweeView.setImageURI(uri);
+
+        /*Picasso.with(mContext)
+                .load(performer.getmCoverBig())
                 .error(R.color.gray_overlay)
                 .placeholder(R.color.gray_overlay)
                 .networkPolicy(NetworkPolicy.OFFLINE)
-                        //.into(holder.imgThumbnail);
-
                 .into(holder.imgThumbnail, new Callback() {
                     @Override
                     public void onSuccess() {
@@ -72,7 +78,7 @@ public class MainGridAdapter extends RecyclerView.Adapter<MainGridAdapter.ViewHo
                     public void onError() {
                         //Try again online if cache failed
                         Picasso.with(mContext)
-                                .load(item.getmImageUrl())
+                                .load(performer.getmCoverBig())
                                 .error(R.color.gray_overlay)
                                 .placeholder(R.color.gray_overlay)
                                 .into(holder.imgThumbnail, new Callback() {
@@ -89,16 +95,22 @@ public class MainGridAdapter extends RecyclerView.Adapter<MainGridAdapter.ViewHo
                     }
                 });*/
 
+        holder.tv_performer_name.setText(performer.getmName());
+        holder.tv_performer_name.setTypeface(null, Typeface.BOLD);
 
-       /* holder.tv_item_name.setText(item.getmItemName());
-        String srt = item.getmNewPrice() + " \u20BD";
-        holder.tv_new_price.setText(srt);
-        holder.tv_new_price.setTypeface(null, Typeface.BOLD);*/
+        List genres = performer.getmGenres();
+
+        String genresString = TextUtils.join(", ", genres);
+        holder.tv_performer_genres.setText(genresString);
+
+        String tracksAlbumsString = (String.valueOf(performer.getmAlbums())+ " albums, " + String.valueOf(performer.getmTracks()) + " tracks");
+        holder.tv_performer_tracks_and_albums.setText(tracksAlbumsString);
     }
 
     @Override
     public int getItemCount() {
         return mItems.size();
+        //return 0;
     }
 
     public void setOnItemClickListener(final OnItemClickListener mItemClickListener) {
@@ -111,34 +123,38 @@ public class MainGridAdapter extends RecyclerView.Adapter<MainGridAdapter.ViewHo
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public LinearLayout placeHolder;
-        public LinearLayout placeNameHolder;
-        public RelativeLayout placePriceHolder;
-
+        //public LinearLayout placeMainHolder;
+        public LinearLayout placeInfoHolder;
+        RelativeLayout placeMainHolder;
         public ImageView imgThumbnail;
-        public TextView tv_item_name;
-        public TextView tv_old_price, tv_new_price;
+        public TextView tv_performer_name, tv_performer_genres,
+                tv_performer_tracks_and_albums;
+
+        SimpleDraweeView draweeView;
 
         public ViewHolder(View itemView) {
             super(itemView);
-            placeHolder = (LinearLayout) itemView.findViewById(R.id.mainHolder);
-            tv_item_name = (TextView) itemView.findViewById(R.id.tv_item_name);
+            //placeMainHolder = (LinearLayout) itemView.findViewById(R.id.placeMainHolder);
+            placeMainHolder = (RelativeLayout) itemView.findViewById(R.id.placeMainHolder);
 
-            placeNameHolder = (LinearLayout) itemView.findViewById(R.id.placeNameHolder);
             imgThumbnail = (ImageView) itemView.findViewById(R.id.iv_image_url);
 
-            placePriceHolder = (RelativeLayout) itemView.findViewById(R.id.placePriceHolder);
-            //tv_old_price = (TextView) itemView.findViewById(R.id.tv_old_price);
-            tv_new_price = (TextView) itemView.findViewById(R.id.tv_new_price);
+            draweeView = (SimpleDraweeView) itemView.findViewById(R.id.iv_image_url);
 
-            placeHolder.setOnClickListener(this);
+            placeInfoHolder = (LinearLayout) itemView.findViewById(R.id.placeInfoHolder);
+
+            tv_performer_name = (TextView) itemView.findViewById(R.id.tv_performer_name);
+            tv_performer_genres = (TextView) itemView.findViewById(R.id.tv_performer_genres);
+            tv_performer_tracks_and_albums = (TextView) itemView.findViewById(R.id.tv_performer_tracks_and_albums);
+
+            placeMainHolder.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View v) {
             if (mItemClickListener != null) {
                 Performer item = mItems.get(getAdapterPosition());
-                //mItemClickListener.onItemClick(itemView, item.getmIdFromAPI());
+                mItemClickListener.onItemClick(itemView, (int)item.getmId());
             }
         }
     }

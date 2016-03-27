@@ -31,7 +31,7 @@
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rc_list"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:background="#e0e0e0"
             android:scrollbars="vertical"
             android:fadeScrollbars="true"

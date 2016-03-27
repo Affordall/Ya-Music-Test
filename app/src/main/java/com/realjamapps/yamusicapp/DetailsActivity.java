@@ -5,6 +5,8 @@ import android.os.Bundle;
 
 public class DetailsActivity extends AppCompatActivity {
 
+    public static final String EXTRA_PARAM_ID = "item_id";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

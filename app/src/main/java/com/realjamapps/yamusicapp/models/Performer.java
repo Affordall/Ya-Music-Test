@@ -4,9 +4,9 @@ import java.util.List;
 
 public class Performer {
 
-    private long mId;
+    private int mId;
     private String mName;
-    private List mGenres;
+    private List<?> mGenres;
     private int mTracks;
     private int mAlbums;
     private String mLink;
@@ -25,7 +25,7 @@ public class Performer {
     /**
      * Create normal constructor
      * */
-    public Performer(long _id, String _perfName, List _perfGenres, int _perfTracks,
+    public Performer(int _id, String _perfName, List _perfGenres, int _perfTracks,
                 int _perfAlbums, String _perfUrl, String _perfDescription, String _smallCover,
                 String _bigCover) {
         this.mId = _id;
@@ -41,17 +41,17 @@ public class Performer {
 
     /**
      * Getter for Performer ID
-     * @return long mId;
+     * @return int mId;
      * */
-    public long getmId() {
+    public int getmId() {
         return mId;
     }
 
     /**
      * Setter for Performer ID
-     * @param mId long
+     * @param mId int
      * */
-    public void setmId(long mId) {
+    public void setmId(int mId) {
         this.mId = mId;
     }
 
@@ -83,7 +83,7 @@ public class Performer {
      * Setter for Performer Genres
      * @param mGenres List
      * */
-    public void setmGenres(List<Genres> mGenres) {
+    public void setmGenres(List<?> mGenres) {
         this.mGenres = mGenres;
     }
 

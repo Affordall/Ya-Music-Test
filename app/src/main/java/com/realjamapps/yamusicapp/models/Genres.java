@@ -19,6 +19,10 @@ public class Genres {
         this.name = _genresName;
     }
 
+    public Genres(String _genresName) {
+        this.name = _genresName;
+    }
+
     /**
      * Getter for Genres ID
      * @return int id;
