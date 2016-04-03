@@ -1,6 +1,12 @@
 package com.realjamapps.yamusicapp.models;
 
-public class Genres {
+import java.io.Serializable;
+
+public class Genres implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    private boolean isSelected;
 
     private int id;
     private String name;
@@ -17,6 +23,12 @@ public class Genres {
     public Genres(int _genresID, String _genresName) {
         this.id = _genresID;
         this.name = _genresName;
+    }
+
+    public Genres(int _genresID, String _genresName, boolean isSelected) {
+        this.id = _genresID;
+        this.name = _genresName;
+        this.isSelected = isSelected;
     }
 
     public Genres(String _genresName) {
@@ -53,5 +65,13 @@ public class Genres {
      * */
     public void setName(String name) {
         this.name = name;
+    }
+
+    public boolean isSelected() {
+        return isSelected;
+    }
+
+    public void setSelected(boolean isSelected) {
+        this.isSelected = isSelected;
     }
 }

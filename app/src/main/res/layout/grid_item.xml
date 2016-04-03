@@ -1,38 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-    <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/placeMainHolder"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="@android:color/white">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white">
 
-        <ImageView
-            android:id="@+id/iv_image_url"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:layout_weight="1"
-            android:padding="10dp"
-            android:scaleType="fitCenter" />
-        <!--android:transitionName="tImage" />-->
 
-        <LinearLayout
-            android:id="@+id/placeInfoHolder"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical" >
-            <!--android:transitionName="tNameHolder">-->
+            android:id="@+id/placeMainHolder"
+            android:padding="16dp">
+
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/iv_image_url"
+                android:layout_width="180dp"
+                android:layout_height="150dp"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:paddingRight="16dp"
+                android:paddingEnd="16dp"
+                fresco:actualImageScaleType="fitCenter" />
+
+            <!--<ImageView
+                android:id="@+id/iv_image_url"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+
+
+                android:paddingRight="16dp"
+                android:paddingEnd="16dp"
+
+                android:scaleType="fitCenter" />-->
 
             <TextView
                 android:id="@+id/tv_performer_name"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:gravity="top"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:paddingLeft="10dp"
+
+                android:layout_toRightOf="@+id/iv_image_url"
+                android:layout_toEndOf="@+id/iv_image_url"
+                android:layout_alignParentTop="true"
+
+                android:paddingTop="16dp"
+
                 android:text="performer_name"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textColor="@color/colorPrimaryText" />
@@ -40,30 +53,37 @@
 
             <TextView
                 android:id="@+id/tv_performer_genres"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:gravity="center"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:paddingLeft="10dp"
+
+                android:layout_toRightOf="@+id/iv_image_url"
+                android:layout_toEndOf="@+id/iv_image_url"
+                android:layout_below="@+id/tv_performer_name"
+
+
                 android:text="performer_genres"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textColor="@color/colorSecondaryText" />
 
             <TextView
                 android:id="@+id/tv_performer_tracks_and_albums"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:gravity="bottom"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:paddingLeft="10dp"
+
+                android:layout_toRightOf="@+id/iv_image_url"
+                android:layout_toEndOf="@+id/iv_image_url"
+                android:layout_below="@+id/tv_performer_genres"
+
+                android:layout_alignParentBottom="true"
+
+                android:paddingBottom="10dp"
+
                 android:text="performer_tracks_albums"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textColor="@color/colorSecondaryText" />
 
-        </LinearLayout>
+        </RelativeLayout>
 
-    </LinearLayout>
+
+
+</LinearLayout>

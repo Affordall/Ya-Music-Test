@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Ya Music App</string>
+    <string name="action_settings">Настройки</string>
+    <string name="albums">альбомов</string>
+    <string name="biography">Биография</string>
+    <string name="cancel">Отмена</string>
+    <string name="done">ОК</string>
+    <string name="internet_is_off">Интернет выключен :(</string>
+    <string name="no_records">Ничего не найдено!</string>
+    <string name="rate_later">Позже</string>
+    <string name="rate_never">Нет, спасибо</string>
+    <string name="rate_now">Оценить сейчас</string>
+    <string name="rate_title">Оценить приложение</string>
+    <string name="search_hint">Apocalyptica</string>
+    <string name="search_title">Поиск</string>
+    <string name="title_filter_activity">Выберите жанр:</string>
+    <string name="tracks">треков</string>
+    <string name="update_complete">Обновлено!</string>
+    <string name="updating_progress">Загрузка…</string>
+    <string name="wrong_result">Жанр не выбран</string>
+    <string name="rate_explanation">Вам нравится это приложение? Мы будем очень признательны, если Вы оцените наше приложение на Google Play. Спасибо Вам за поддержку!</string>
+</resources>

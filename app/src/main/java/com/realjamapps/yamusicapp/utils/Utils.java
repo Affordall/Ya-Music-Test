@@ -1,5 +1,6 @@
 package com.realjamapps.yamusicapp.utils;
 
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +13,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
 import com.realjamapps.yamusicapp.R;
+import com.realjamapps.yamusicapp.receivers.DownloadResultReceiver;
+import com.realjamapps.yamusicapp.services.DownloadServiceIntent;
 
 public class Utils {
 
@@ -65,6 +68,12 @@ public class Utils {
         styledAttributes.recycle();
 
         return toolbarHeight;
+    }
+
+    public static void createIntentStartService(Context context, DownloadResultReceiver receiver) {
+        Intent intent = new Intent(Intent.ACTION_SYNC, null, context, DownloadServiceIntent.class);
+        intent.putExtra("receiver", receiver);
+        context.startService(intent);
     }
 
     public static boolean isLollipop() {

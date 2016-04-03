@@ -17,7 +17,7 @@
         android:uiOptions="splitActionBarWhenNarrow">
 
         <activity
-            android:name=".MainActivity"
+            android:name=".splash_screen.Splashscreen"
             android:configChanges="orientation|screenSize"
             android:label="@string/app_name"
             android:launchMode="singleTop"
@@ -29,14 +29,56 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".DetailsActivity"
+        <activity
+            android:name=".content.MainActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/app_name"
             android:launchMode="singleTop"
-            android:parentActivityName="com.realjamapps.yamusicapp.MainActivity" >
+            android:theme="@style/AppTheme.NoActionBar">
+
+        </activity>
+
+        <activity android:name=".content.DetailsActivity"
+            android:launchMode="singleTop"
+            android:parentActivityName=".content.MainActivity" >
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.realjamapps.yamusicapp.MainActivity" />
+                android:value=".content.MainActivity" />
         </activity>
+
+        <activity android:name=".content.SearchResultsActivity"
+            android:parentActivityName=".content.MainActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/AppTheme" >
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".content.MainActivity" />
+
+            <meta-data android:name="android.app.searchable"
+                android:resource="@xml/searchable"
+                android:value=".content.SearchResultActivity" />
+        </activity>
+
+        <activity
+            android:name=".content.GenreFilterActivity"
+            android:parentActivityName=".content.MainActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/AppTheme" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".content.MainActivity" />
+        </activity>
+
+        <service
+            android:name=".services.DownloadServiceIntent"
+            android:exported="false" />
 
     </application>
 

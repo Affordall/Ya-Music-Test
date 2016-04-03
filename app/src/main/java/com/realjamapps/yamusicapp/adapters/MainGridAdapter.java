@@ -5,7 +5,6 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,9 +15,6 @@ import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.realjamapps.yamusicapp.R;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.NetworkPolicy;
-import com.squareup.picasso.Picasso;
 
 import com.realjamapps.yamusicapp.models.Performer;
 
@@ -50,7 +46,7 @@ public class MainGridAdapter extends RecyclerView.Adapter<MainGridAdapter.ViewHo
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.grid_item_test, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.grid_item, parent, false);
         return new ViewHolder(view);
     }
 
@@ -59,41 +55,9 @@ public class MainGridAdapter extends RecyclerView.Adapter<MainGridAdapter.ViewHo
 
         final Performer performer = mItems.get(position);
 
-        Uri uri = Uri.parse(performer.getmCoverBig());
+        Uri uri = Uri.parse(performer.getmCoverSmall());
 
         holder.draweeView.setImageURI(uri);
-
-        /*Picasso.with(mContext)
-                .load(performer.getmCoverBig())
-                .error(R.color.gray_overlay)
-                .placeholder(R.color.gray_overlay)
-                .networkPolicy(NetworkPolicy.OFFLINE)
-                .into(holder.imgThumbnail, new Callback() {
-                    @Override
-                    public void onSuccess() {
-
-                    }
-
-                    @Override
-                    public void onError() {
-                        //Try again online if cache failed
-                        Picasso.with(mContext)
-                                .load(performer.getmCoverBig())
-                                .error(R.color.gray_overlay)
-                                .placeholder(R.color.gray_overlay)
-                                .into(holder.imgThumbnail, new Callback() {
-                                    @Override
-                                    public void onSuccess() {
-
-                                    }
-
-                                    @Override
-                                    public void onError() {
-                                        Log.v("Picasso", "Could not fetch image");
-                                    }
-                                });
-                    }
-                });*/
 
         holder.tv_performer_name.setText(performer.getmName());
         holder.tv_performer_name.setTypeface(null, Typeface.BOLD);
@@ -110,7 +74,6 @@ public class MainGridAdapter extends RecyclerView.Adapter<MainGridAdapter.ViewHo
     @Override
     public int getItemCount() {
         return mItems.size();
-        //return 0;
     }
 
     public void setOnItemClickListener(final OnItemClickListener mItemClickListener) {
@@ -137,11 +100,11 @@ public class MainGridAdapter extends RecyclerView.Adapter<MainGridAdapter.ViewHo
             //placeMainHolder = (LinearLayout) itemView.findViewById(R.id.placeMainHolder);
             placeMainHolder = (RelativeLayout) itemView.findViewById(R.id.placeMainHolder);
 
-            imgThumbnail = (ImageView) itemView.findViewById(R.id.iv_image_url);
+            //imgThumbnail = (ImageView) itemView.findViewById(R.id.iv_image_url);
 
             draweeView = (SimpleDraweeView) itemView.findViewById(R.id.iv_image_url);
 
-            placeInfoHolder = (LinearLayout) itemView.findViewById(R.id.placeInfoHolder);
+            //placeInfoHolder = (LinearLayout) itemView.findViewById(R.id.placeInfoHolder);
 
             tv_performer_name = (TextView) itemView.findViewById(R.id.tv_performer_name);
             tv_performer_genres = (TextView) itemView.findViewById(R.id.tv_performer_genres);

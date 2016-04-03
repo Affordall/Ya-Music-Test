@@ -2,7 +2,7 @@ package com.realjamapps.yamusicapp.parsers;
 
 import android.content.Context;
 
-import com.realjamapps.yamusicapp.DatabaseHandler;
+import com.realjamapps.yamusicapp.database.DatabaseHandler;
 import com.realjamapps.yamusicapp.models.Genres;
 import com.realjamapps.yamusicapp.models.Performer;
 import com.squareup.okhttp.MediaType;
@@ -16,6 +16,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class GetAllDataParser {
@@ -50,7 +51,6 @@ public class GetAllDataParser {
             getJson(serverData);
         } else {
             return;
-            // TODO: 27.01.2016
         }
 
     }
@@ -60,7 +60,9 @@ public class GetAllDataParser {
         if (handler.doIt(TableName, ColumnName, ColumnData)) {
             //Do Nothing. Genre already exist.
         } else {
-            handler.addGenres(new Genres(ColumnData));
+            if(ColumnData != null && !ColumnData.isEmpty()) {
+                handler.addGenres(new Genres(ColumnData));
+            }
         }
     }
 
@@ -75,21 +77,30 @@ public class GetAllDataParser {
                 JSONObject coversJO = jsonObjectItem.getJSONObject("cover");
 
 
-
                 JSONArray jsonArrayGenres = jsonObjectItem.getJSONArray("genres");
 
+                String rawGenreString = jsonArrayGenres.toString();
+
+                String jsonFormattedString = rawGenreString.replaceAll("\"|\\[|\\]", "");
+
+
+
+                List<String> eachGenreStringList =
+                        Arrays.asList(jsonFormattedString.split("\\s*,\\s*"));
+
+
                 List<String> genresList = new ArrayList<>();
-                genresList.add(jsonArrayGenres.toString());
 
-                /*List <Genres> genresList = new ArrayList<>();
-                for (int j = 0; j < jsonArrayGenres.length(); j++) {
+                for (int j = 0; j < eachGenreStringList.size(); j++) {
+                    Genres genre = new Genres();
+                    String eachGenreNameString = eachGenreStringList.get(j);
+                    genre.setName(eachGenreNameString);
+                    checkGenreExist(handler, "genres", "genres_name", eachGenreNameString);
+                    genresList.add(eachGenreNameString);
+                }
 
-                    String[] arr = jsonArray.toString().replace("},{", " ,").split(" ");
-                    String [] prt = jsonArrayGenres.getJSONObject(j).toString();
-                    Genres g = new Genres();
-                    g.setName();
-                    genresList.add(g);
-                }*/
+
+                // TODO: 29.03.16 Add if statement for catch exceptions
 
                 Performer item = new Performer();
 
@@ -101,35 +112,23 @@ public class GetAllDataParser {
                 item.setmTracks(Integer.parseInt(jsonObjectItem.getString("tracks")));
                 item.setmAlbums(Integer.parseInt(jsonObjectItem.getString("albums")));
 
-                //item.setmLink(jsonObjectItem.getString("link"));
-                item.setmDescription(jsonObjectItem.getString("description"));
+                if(jsonObjectItem.has("link")) {
+                    item.setmLink(jsonObjectItem.getString("link"));
+                }
+
+                String rawDescription  = jsonObjectItem.getString("description");
+                String finDescription = rawDescription.substring(0,1).toUpperCase() + rawDescription.substring(1);
+
+                item.setmDescription(finDescription);
 
                 item.setmCoverSmall(coversJO.getString("small"));
                 item.setmCoverBig(coversJO.getString("big"));
 
                 handler.addPerformer(item);
-                //checkGenreExist(handler, "genres", "genres_name", commonGenreName);
             }
         } catch (JSONException e) {
             e.printStackTrace(); // TODO: тоже залогировать или обработать надо
         }
     }
-
-
-
-    /*public static String[] getStringArray(JSONArray jsonArray){
-        String[] stringArray = null;
-        int length = jsonArray.length();
-        if(jsonArray!=null){
-            stringArray = new String[length];
-            for(int i=0;i<length;i++){
-                stringArray[i]= array.optString(i);
-            }
-        }
-        return stringArray;
-    }*/
-
-
-
 }
 
