@@ -61,8 +61,6 @@ public class GenreFilterActivity extends AppCompatActivity {
             startGenresFetcherTask();
         }
 
-        // TODO: 01.04.16  http://android-pratap.blogspot.ru/2015/01/recyclerview-with-checkbox-example.html
-
         mFab = (FloatingActionButton)findViewById(R.id.fabFilters);
 
         assert mFab != null;
