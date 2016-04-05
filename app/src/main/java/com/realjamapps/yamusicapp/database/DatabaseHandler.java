@@ -238,7 +238,6 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
     public ArrayList<Genres> getAllGenres() {
         ArrayList<Genres> genresArrayList = new ArrayList<>();
 
-        //String selectQuery = "SELECT  * FROM " + TABLE_GENRES;
         String selectQuery = "SELECT  * FROM " + TABLE_GENRES + " ORDER BY "+ KEY_GENRES_NAME +" ASC";
 
         SQLiteDatabase db = this.getReadableDatabase();

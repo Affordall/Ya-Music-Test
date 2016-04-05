@@ -8,14 +8,11 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.realjamapps.yamusicapp.R;
-
 import com.realjamapps.yamusicapp.models.Performer;
 
 import java.util.ArrayList;
@@ -35,7 +32,6 @@ public class MainGridAdapter extends RecyclerView.Adapter<MainGridAdapter.ViewHo
 
     public void refresh(ArrayList<Performer> listData) {
         this.mItems = listData;
-        //System.gc();
         notifyDataSetChanged();
     }
 
@@ -67,7 +63,10 @@ public class MainGridAdapter extends RecyclerView.Adapter<MainGridAdapter.ViewHo
         String genresString = TextUtils.join(", ", genres);
         holder.tv_performer_genres.setText(genresString);
 
-        String tracksAlbumsString = (String.valueOf(performer.getmAlbums())+ " albums, " + String.valueOf(performer.getmTracks()) + " tracks");
+        String tracksAlbumsString = (String.valueOf(performer.getmAlbums())+ " "
+                + mContext.getString(R.string.albums) + ", "
+                + String.valueOf(performer.getmTracks()) + " "
+                + mContext.getString(R.string.tracks));
         holder.tv_performer_tracks_and_albums.setText(tracksAlbumsString);
     }
 
@@ -80,16 +79,12 @@ public class MainGridAdapter extends RecyclerView.Adapter<MainGridAdapter.ViewHo
         this.mItemClickListener = mItemClickListener;
     }
 
-
     public interface OnItemClickListener {
         void onItemClick(View view, int position);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        //public LinearLayout placeMainHolder;
-        public LinearLayout placeInfoHolder;
         RelativeLayout placeMainHolder;
-        public ImageView imgThumbnail;
         public TextView tv_performer_name, tv_performer_genres,
                 tv_performer_tracks_and_albums;
 
@@ -97,15 +92,8 @@ public class MainGridAdapter extends RecyclerView.Adapter<MainGridAdapter.ViewHo
 
         public ViewHolder(View itemView) {
             super(itemView);
-            //placeMainHolder = (LinearLayout) itemView.findViewById(R.id.placeMainHolder);
             placeMainHolder = (RelativeLayout) itemView.findViewById(R.id.placeMainHolder);
-
-            //imgThumbnail = (ImageView) itemView.findViewById(R.id.iv_image_url);
-
             draweeView = (SimpleDraweeView) itemView.findViewById(R.id.iv_image_url);
-
-            //placeInfoHolder = (LinearLayout) itemView.findViewById(R.id.placeInfoHolder);
-
             tv_performer_name = (TextView) itemView.findViewById(R.id.tv_performer_name);
             tv_performer_genres = (TextView) itemView.findViewById(R.id.tv_performer_genres);
             tv_performer_tracks_and_albums = (TextView) itemView.findViewById(R.id.tv_performer_tracks_and_albums);
@@ -117,7 +105,7 @@ public class MainGridAdapter extends RecyclerView.Adapter<MainGridAdapter.ViewHo
         public void onClick(View v) {
             if (mItemClickListener != null) {
                 Performer item = mItems.get(getAdapterPosition());
-                mItemClickListener.onItemClick(itemView, (int)item.getmId());
+                mItemClickListener.onItemClick(itemView, item.getmId());
             }
         }
     }

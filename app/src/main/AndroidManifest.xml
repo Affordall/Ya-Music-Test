@@ -38,6 +38,22 @@
 
         </activity>
 
+        <activity
+            android:name=".intro.FancyAppIntro"
+            android:launchMode="singleTop"
+            android:theme="@style/AppTheme" />
+
+        <activity
+            android:name=".content.SettingsActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/AppTheme"
+            android:parentActivityName=".content.MainActivity" >
+        <!-- Parent activity meta-data to support 4.0 and lower -->
+        <meta-data
+            android:name="android.support.PARENT_ACTIVITY"
+            android:value=".content.MainActivity" />
+        </activity>
+
         <activity android:name=".content.DetailsActivity"
             android:launchMode="singleTop"
             android:parentActivityName=".content.MainActivity" >

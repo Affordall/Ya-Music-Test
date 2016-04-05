@@ -20,4 +20,23 @@
     <string name="updating_progress">Загрузка…</string>
     <string name="wrong_result">Жанр не выбран</string>
     <string name="rate_explanation">Вам нравится это приложение? Мы будем очень признательны, если Вы оцените наше приложение на Google Play. Спасибо Вам за поддержку!</string>
+
+    <string name="perm_access_denied">Доступ к сервисам геолокации запрещен</string>
+    <string name="permission_question">Пожалуйста, предоставьте доступ к сервисам Геолокации. Это необходимо для сбора анонимной статистики и к свою очередь, улучшения приложения в дальнейшем.</string>
+    <string name="perm_access_granted">Спасибо Вам за доверие! Теперь вы можете спокойно пользоваться приложением, без каких-либо ограничений.</string>
+
+    <string name="oops_error">Упс! Ошибка. Что-то пошло не так..</string>
+
+    <string name="slide_one_title">Добро пожаловать!</string>
+    <string name="slide_one_text">Добро пожаловать! :)</string>
+    <string name="slide_two_title">Простота использования!</string>
+    <string name="slide_two_text">Потяните страницу вниз и новые скидки уже у вас в телефоне!</string>
+    <string name="slide_three_title">Информативность!</string>
+    <string name="slide_three_text">Нажмите на товар, чтобы увидеть всю информацию!</string>
+    <string name="slide_four_title">Удобство!</string>
+    <string name="slide_four_text">Забыли что хотели купить? Добавьте товар в корзину!</string>
+    <string name="slide_fifth_title">Готовность к Android 6.0!</string>
+    <string name="slide_fifth_text">Только анонимная статистика об ошибках!</string>
+    <string name="share_via">Поделиться</string>
+
 </resources>

@@ -12,22 +12,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.realjamapps.yamusicapp.R;
 import com.realjamapps.yamusicapp.adapters.MainGridAdapter;
 import com.realjamapps.yamusicapp.database.DatabaseHandler;
-import com.realjamapps.yamusicapp.R;
 import com.realjamapps.yamusicapp.models.Performer;
 import com.realjamapps.yamusicapp.utils.Utils;
-import com.transitionseverywhere.TransitionManager;
 
 import java.util.ArrayList;
 
@@ -55,16 +52,13 @@ public class SearchResultsActivity extends AppCompatActivity {
 
             ImageView placeImage = (ImageView) v.findViewById(R.id.iv_image_url);
             placeImage.setDrawingCacheEnabled(true);
-            TransitionManager.setTransitionName(placeImage, "tImage");
 
             //LinearLayout placeNameHolder = (LinearLayout) v.findViewById(R.id.placeNameHolder);
             TextView placeNameHolder = (TextView) v.findViewById(R.id.tv_performer_name);
-            TransitionManager.setTransitionName(placeNameHolder, "tNameHolder");
 
             //RelativeLayout placePriceHolder = (RelativeLayout) v.findViewById(R.id.placePriceHolder);
             //TransitionManager.setTransitionName(placePriceHolder, "tPriceHolder");
 
-            TransitionManager.setTransitionName(mToolbar, "tActionBar");
 
             //View navigationBar = findViewById(android.R.id.navigationBarBackground);
             //View statusBar = findViewById(android.R.id.statusBarBackground);

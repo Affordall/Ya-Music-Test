@@ -10,7 +10,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/placeMainHolder"
-            android:padding="16dp">
+            android:paddingTop="@dimen/activity_horizontal_margin"
+            android:paddingBottom="@dimen/activity_horizontal_margin"
+            >
 
             <com.facebook.drawee.view.SimpleDraweeView
                 android:id="@+id/iv_image_url"
@@ -18,22 +20,8 @@
                 android:layout_height="150dp"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
-                android:paddingRight="16dp"
-                android:paddingEnd="16dp"
+
                 fresco:actualImageScaleType="fitCenter" />
-
-            <!--<ImageView
-                android:id="@+id/iv_image_url"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-
-
-                android:paddingRight="16dp"
-                android:paddingEnd="16dp"
-
-                android:scaleType="fitCenter" />-->
 
             <TextView
                 android:id="@+id/tv_performer_name"

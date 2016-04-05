@@ -9,7 +9,7 @@
     app:showAsAction="collapseActionView|ifRoom"
     app:actionViewClass="android.support.v7.widget.SearchView" />
 
-    <item android:id="@+id/listview"
+    <item android:id="@+id/action_filter"
         app:showAsAction="always"
         android:orderInCategory="300"
         android:icon="@drawable/ic_filter_list_white_24dp"

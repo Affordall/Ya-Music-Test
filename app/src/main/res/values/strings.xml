@@ -26,4 +26,30 @@
 
     <string name="title_filter_activity">Choose the genres:</string>
     <string name="wrong_result">Wrong result</string>
+
+    <string name="permission_question">You need to allow access to Last Known Location</string>
+    <string name="perm_access_granted">Thank you! Now you can use the app without any limits!</string>
+    <string name="perm_access_denied">ACCESS_COARSE_LOCATION Denied!</string>
+
+    <string name="oops_error">Oops! Sorry! Something went wrong..</string>
+
+    <string name="slide_one_text">Enjoy your stay! :)</string>
+    <string name="slide_one_title">Welcome!</string>
+    <string name="slide_two_text">Pull down to update discounts!</string>
+    <string name="slide_two_title">Simpleness</string>
+    <string name="slide_three_text">Click on the  product and see more information!</string>
+    <string name="slide_three_title">Completeness</string>
+    <string name="slide_four_text">Forgot to buy something? Just use shopping cart!</string>
+    <string name="slide_four_title">Convenience</string>
+    <string name="slide_fifth_title">Android 6.0 Ready!</string>
+    <string name="slide_fifth_text">No personal info. Just anon. statistics!</string>
+
+    <string name="transition_name_performer">name_performer</string>
+    <string name="transition_image_performer">image_performer</string>
+
+    <string name="share_via">Share via</string>
+
+    <string name="settings_checkbox_text">Show Splash Screen on start</string>
+    <string name="settings_changed">Settings changed</string>
+
 </resources>

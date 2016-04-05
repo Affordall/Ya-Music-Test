@@ -1,6 +1,5 @@
 <resources>
 
-
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -13,6 +12,12 @@
         <!--<item name="homeAsUpIndicator">@drawable/ic_chevron_left_white_24dp</item>-->
         <item name="actionModeShareDrawable">@android:drawable/ic_menu_share</item>
 
+    </style>
+
+    <style name="Theme.Transparent" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
     <style name="Divider">
@@ -37,8 +42,9 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>-->
-    <style name="ToolbarColoredBackArrow" parent="AppTheme">
-        <item name="android:textColorSecondary">@color/colorDivider</item>
+    <style name="ToolbarColoredBackArrow" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:textColorPrimary">@color/colorIcons</item>
+        <item name="android:textColorSecondary">@color/colorIcons</item>
     </style>
 
     <style name="AppTheme.NoActionBar">

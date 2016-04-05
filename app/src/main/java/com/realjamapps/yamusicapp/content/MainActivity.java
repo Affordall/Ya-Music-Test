@@ -4,13 +4,15 @@ import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.util.Pair;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -23,20 +25,20 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.view.Window;
 import android.widget.Toast;
 
-import com.realjamapps.yamusicapp.database.DatabaseHandler;
+import com.facebook.drawee.view.SimpleDraweeView;
 import com.realjamapps.yamusicapp.R;
 import com.realjamapps.yamusicapp.adapters.MainGridAdapter;
+import com.realjamapps.yamusicapp.database.DatabaseHandler;
+import com.realjamapps.yamusicapp.intro.FancyAppIntro;
 import com.realjamapps.yamusicapp.models.Performer;
 import com.realjamapps.yamusicapp.receivers.DownloadResultReceiver;
 import com.realjamapps.yamusicapp.services.DownloadServiceIntent;
 import com.realjamapps.yamusicapp.utils.DividerItemDecoration;
 import com.realjamapps.yamusicapp.utils.Utils;
 import com.realjamapps.yamusicapp.utils.YaMusicApp;
-import com.transitionseverywhere.TransitionManager;
 
 import java.util.ArrayList;
 
@@ -69,35 +71,7 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
 
             Intent transitionIntent = new Intent(MainActivity.this, DetailsActivity.class);
             transitionIntent.putExtra(DetailsActivity.EXTRA_PARAM_ID, position);
-
-            ImageView placeImage = (ImageView) v.findViewById(R.id.iv_image_url);
-            placeImage.setDrawingCacheEnabled(true);
-            TransitionManager.setTransitionName(placeImage, "tImage");
-
-            //LinearLayout placeNameHolder = (LinearLayout) v.findViewById(R.id.placeNameHolder);
-            TextView placeNameHolder = (TextView) v.findViewById(R.id.tv_performer_name);
-            TransitionManager.setTransitionName(placeNameHolder, "tNameHolder");
-
-            //RelativeLayout placePriceHolder = (RelativeLayout) v.findViewById(R.id.placePriceHolder);
-            //TransitionManager.setTransitionName(placePriceHolder, "tPriceHolder");
-
-            TransitionManager.setTransitionName(toolbar, "tActionBar");
-
-            //View navigationBar = findViewById(android.R.id.navigationBarBackground);
-            //View statusBar = findViewById(android.R.id.statusBarBackground);
-
-
-            Pair<View, String> imagePair = Pair.create((View) placeImage, "tImage");
-            //Pair<View, String> holderPair = Pair.create((View) placeNameHolder, "tNameHolder");
-            //Pair<View, String> pricePair = Pair.create((View) placePriceHolder, "tPriceHolder");
-            //Pair<View, String> navPair = Pair.create(navigationBar, Window.NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME); //Shared elem is null
-            //Pair<View, String> statusPair = Pair.create(statusBar, Window.STATUS_BAR_BACKGROUND_TRANSITION_NAME);
-            Pair<View, String> toolbarPair = Pair.create((View) toolbar, "tActionBar");
-
-            //ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(TestMain.this, imagePair, holderPair, navPair, statusPair, toolbarPair);
-            //ActivityOptionsCompat options = makeSceneTransitionAnimation(TestMain.this, imagePair, holderPair, navPair, statusPair, toolbarPair);
-            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(MainActivity.this, imagePair , toolbarPair);
-            ActivityCompat.startActivity(MainActivity.this, transitionIntent, options.toBundle());
+            startActivity(transitionIntent);
 
             //TODO: https://github.com/lgvalle/Material-Animations/
 
@@ -105,16 +79,27 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
 
             // TODO: https://github.com/code-computerlove/FastScrollRecyclerView/
 
+            // https://android-arsenal.com/details/3/2212 <<-- Nice
+
 
         }
     };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        SharedPreferences sharedPreferences = getSharedPreferences(APP_SETTINGS, Context.MODE_PRIVATE);
+        int savedIntoViewIndex = sharedPreferences.getInt("SAVED_VIEW_INTRO_OR_NOT_INDEX", 0);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        if (savedIntoViewIndex == 0) {
+            Intent intentIntro = new Intent(this, FancyAppIntro.class);
+            startActivity(intentIntro);
+        }
 
         mRecyclerView = (RecyclerView) findViewById(R.id.rc_list);
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this, null));
@@ -168,7 +153,22 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
                 android.R.color.holo_green_dark,
                 android.R.color.holo_orange_dark,
                 android.R.color.holo_red_dark);
+
+        if (Utils.isLollipop()) {
+            //setupWindowAnimations();
+        }
     }
+
+    /*@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void setupWindowAnimations() {
+        Fade fade = new Fade();
+        fade.setDuration(1000);
+        getWindow().setExitTransition(fade);
+
+        Slide slide = new Slide();
+        slide.setDuration(1000);
+        getWindow().setReturnTransition(slide);
+    }*/
 
     private boolean isDBempty() {
         return handler.getPerformersCount() !=0;
@@ -305,9 +305,11 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
         switch (id) {
 
             case (R.id.action_settings):
+                Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
+                startActivity(settingsIntent);
                 return true;
 
-            case (R.id.listview):
+            case (R.id.action_filter):
                 Intent filtersIntent = new Intent(MainActivity.this, GenreFilterActivity.class);
                 startActivityForResult(filtersIntent, REQUEST_CODE_FILTERS);
                 return true;
@@ -327,6 +329,8 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
     protected void onPause() {
         super.onPause();
         YaMusicApp.activityPaused();
+        //lastSpanCount = mStaggeredLayoutManager.getSpanCount();
+        System.gc();
     }
 
     @Override
@@ -403,4 +407,22 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
             Toast.makeText(MainActivity.this, getString(R.string.wrong_result), Toast.LENGTH_LONG).show();
         }
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_CODE_ASK_PERMISSIONS:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission Granted
+                    Toast.makeText(MainActivity.this, getString(R.string.perm_access_granted), Toast.LENGTH_LONG).show();
+                } else {
+                    // Permission Denied
+                    Toast.makeText(MainActivity.this, getString(R.string.perm_access_denied), Toast.LENGTH_LONG).show();
+                }
+                break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
 }

@@ -1,7 +1,8 @@
 package com.realjamapps.yamusicapp.splash_screen;
 
-import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -15,6 +16,7 @@ import android.widget.TextView;
 
 import com.realjamapps.yamusicapp.R;
 import com.realjamapps.yamusicapp.content.MainActivity;
+import com.realjamapps.yamusicapp.content.SettingsActivity;
 
 public class Splashscreen extends AppCompatActivity {
 
@@ -28,9 +30,18 @@ public class Splashscreen extends AppCompatActivity {
     Thread splashTread;
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
+        SharedPreferences sharedPreferences = getSharedPreferences(SettingsActivity.APP_SETTINGS, Context.MODE_PRIVATE);
+        int showSplashScreen = sharedPreferences.getInt(SettingsActivity.KEY_SWITCH_NOTIFY_INDEX, 1);
+
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_splashscreen);
-        StartAnimations();
+
+        if (showSplashScreen == 1) {
+            setContentView(R.layout.activity_splashscreen);
+            StartAnimations();
+        } else {
+            finishThisAndRunMain();
+        }
     }
 
     /**Yes i know that Splash-screen is a anti-pattern.
@@ -69,11 +80,7 @@ public class Splashscreen extends AppCompatActivity {
                         sleep(100);
                         waited += 100;
                     }
-                    Intent intent = new Intent(Splashscreen.this,
-                            MainActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                    startActivity(intent);
-                    Splashscreen.this.finish();
+                    finishThisAndRunMain();
                 } catch (InterruptedException e) {
                     // do nothing
                 } finally {
@@ -84,6 +91,14 @@ public class Splashscreen extends AppCompatActivity {
         };
         splashTread.start();
 
+    }
+
+    private void finishThisAndRunMain() {
+        Intent intent = new Intent(Splashscreen.this,
+                MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        startActivity(intent);
+        Splashscreen.this.finish();
     }
 
 }
