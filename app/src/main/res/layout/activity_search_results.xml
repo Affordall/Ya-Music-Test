@@ -14,21 +14,13 @@
         android:theme="@style/AppTheme.AppBarOverlay">
 
         <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
+            android:id="@+id/toolbar_search"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            app:layout_scrollFlags="scroll|enterAlways"
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 
     </android.support.design.widget.AppBarLayout>
-
-    <TextView
-        android:layout_gravity="top"
-        android:id="@android:id/empty"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/no_records"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/search_result_list"
@@ -37,7 +29,6 @@
         android:background="#e0e0e0"
         android:scrollbars="vertical"
         android:fadeScrollbars="true"
-        android:divider="@null"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:listSelector="@android:color/transparent"/>
 

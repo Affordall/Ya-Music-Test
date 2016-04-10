@@ -5,14 +5,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -25,10 +21,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.Toast;
 
-import com.facebook.drawee.view.SimpleDraweeView;
 import com.realjamapps.yamusicapp.R;
 import com.realjamapps.yamusicapp.adapters.MainGridAdapter;
 import com.realjamapps.yamusicapp.database.DatabaseHandler;
@@ -42,26 +36,26 @@ import com.realjamapps.yamusicapp.utils.YaMusicApp;
 
 import java.util.ArrayList;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
 import dmax.dialog.SpotsDialog;
 
 public class MainActivity extends AppCompatActivity implements DownloadResultReceiver.Receiver {
 
-    private RecyclerView mRecyclerView;
     private LinearLayoutManager mLayoutManager;
     public static final String APP_SETTINGS = "settings";
     private final int REQUEST_CODE_ASK_PERMISSIONS = 123;
     private final int REQUEST_CODE_FILTERS = 1;
-    private Toolbar toolbar;
     private Menu menu;
     private SpotsDialog dialog;
     private MainGridAdapter mAdapter;
     private DatabaseHandler handler;
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-
     private ArrayList<Performer> mPerformerList;
-
     private DownloadResultReceiver mReceiver;
 
+    @Bind(R.id.toolbar) Toolbar toolbar;
+    @Bind(R.id.rc_list) RecyclerView mRecyclerView;
+    @Bind(R.id.swipeContainer) SwipeRefreshLayout mSwipeRefreshLayout;
 
     @Nullable
     MainGridAdapter.OnItemClickListener onItemClickListener = new MainGridAdapter.OnItemClickListener() {
@@ -93,7 +87,8 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        ButterKnife.bind(this);
+
         setSupportActionBar(toolbar);
 
         if (savedIntoViewIndex == 0) {
@@ -101,9 +96,7 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
             startActivity(intentIntro);
         }
 
-        mRecyclerView = (RecyclerView) findViewById(R.id.rc_list);
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this, null));
-        //https://gist.github.com/zokipirlo/82336d89249e05bba5aa
 
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(this);
@@ -113,16 +106,13 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
         mPerformerList = new ArrayList<>();
 
         mAdapter = new MainGridAdapter(getApplicationContext(), mPerformerList);
-
-
         mRecyclerView.setAdapter(mAdapter);
         mAdapter.setOnItemClickListener(onItemClickListener);
 
+        //handler = new DatabaseHandler(this);
+        handler = DatabaseHandler.getInstance(this);
 
-        handler = new DatabaseHandler(this);
-
-
-        /* Starting Download Service */
+        /* Initialize Download Service */
         mReceiver = new DownloadResultReceiver(new Handler());
         mReceiver.setReceiver(this);
 
@@ -132,21 +122,15 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
             mPerformerList = handler.getAllPerformers();
             mAdapter.refresh(mPerformerList);
         } else {
-            //checkInternetAndStartAT();
             checkInternetAndStartService();
         }
 
-        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
 
             @Override
-
             public void onRefresh() {
-
                 refreshList();
-
             }
-
         });
 
         mSwipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_dark,
@@ -175,7 +159,6 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
     }
 
     void refreshList() {
-        //checkInternetAndStartAT();
         checkInternetAndStartService();
         onItemsLoadComplete();
     }
@@ -183,21 +166,6 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
     void onItemsLoadComplete() {
         mSwipeRefreshLayout.setRefreshing(false);
     }
-
-    /*private void checkInternetAndStartAT() {
-        if (Utils.isNetworkUnavailable()) {
-            if (isDBempty()) {
-                handler.deleteAllDBs();
-                if (mAdapter != null) {
-                    mAdapter.clear();
-                }
-            }
-            dts = new DataFetcherTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-        } else {
-            Toast.makeText(this, getString(R.string.internet_is_off), Toast.LENGTH_SHORT).show();
-        }
-    }*/
 
     private void checkInternetAndStartService() {
 
@@ -208,9 +176,7 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
                     mAdapter.clear();
                 }
             }
-
             Utils.createIntentStartService(this, mReceiver);
-
         } else {
             Toast.makeText(this, getString(R.string.internet_is_off), Toast.LENGTH_SHORT).show();
         }
@@ -221,10 +187,9 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
         switch (resultCode) {
             case DownloadServiceIntent.STATUS_RUNNING:
 
-                if (YaMusicApp.isActivityVisible()) {
-                    dialog = new SpotsDialog(MainActivity.this, R.style.CustomProgressDialogStyle);
-                    dialog.show();
-                }
+                 dialog = new SpotsDialog(MainActivity.this, R.style.CustomProgressDialogStyle);
+                 dialog.show();
+
                 break;
             case DownloadServiceIntent.STATUS_FINISHED:
 
@@ -237,48 +202,21 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
 
                 ArrayList<Performer> itemList = handler.getAllPerformers();
                 mAdapter.refresh(itemList);
-                assert dialog != null;
-                dialog.dismiss();
-                Toast.makeText(MainActivity.this, getString(R.string.update_complete), Toast.LENGTH_LONG).show();
 
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+                Toast.makeText(MainActivity.this, getString(R.string.update_complete), Toast.LENGTH_LONG).show();
                 break;
             case DownloadServiceIntent.STATUS_ERROR:
-                assert dialog != null;
-                dialog.dismiss();
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
                 String error = resultData.getString(Intent.EXTRA_TEXT);
                 Toast.makeText(this, error, Toast.LENGTH_LONG).show();
                 break;
         }
     }
-
-
-    /** DataFetcherTask **/
-    /*class DataFetcherTask extends AsyncTask<Void,Void,Void> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            dialog = new SpotsDialog(MainActivity.this, R.style.CustomProgressDialogStyle);
-            dialog.show();
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-
-            new GetAllDataParser().getDataPlease(getApplicationContext());
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            ArrayList<Performer> itemList = handler.getAllPerformers();
-            mAdapter.refresh(itemList);
-            dialog.dismiss();
-            Toast.makeText(MainActivity.this, getString(R.string.update_complete), Toast.LENGTH_LONG).show();
-        }
-    }*/
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -329,7 +267,6 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
     protected void onPause() {
         super.onPause();
         YaMusicApp.activityPaused();
-        //lastSpanCount = mStaggeredLayoutManager.getSpanCount();
         System.gc();
     }
 
@@ -369,8 +306,7 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
 
         @Override
         protected ArrayList<Performer> doInBackground(String... params) {
-            //return handler.getAllPerformersByGenre(params);
-            return handler.getAllPerformersByGenreTest(params);
+            return handler.getAllPerformersByGenre(params);
 
         }
 
@@ -408,7 +344,7 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
         }
     }
 
-    @Override
+    /*@Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case REQUEST_CODE_ASK_PERMISSIONS:
@@ -423,6 +359,6 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
             default:
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
-    }
+    }*/
 
 }

@@ -12,6 +12,9 @@ import com.realjamapps.yamusicapp.models.Genres;
 
 import java.util.ArrayList;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 
 public class GenresListViewAdapter extends RecyclerView.Adapter<GenresListViewAdapter.ViewHolder> {
 
@@ -28,7 +31,6 @@ public class GenresListViewAdapter extends RecyclerView.Adapter<GenresListViewAd
         notifyDataSetChanged();
     }
 
-    // Create new views
     @Override
     public GenresListViewAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                              int viewType) {
@@ -69,17 +71,15 @@ public class GenresListViewAdapter extends RecyclerView.Adapter<GenresListViewAd
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        public TextView tvName;
-        public CheckBox chkSelected;
+        @Bind(R.id.tvName) TextView tvName;
+        @Bind(R.id.chkSelected) CheckBox chkSelected;
 
         public ViewHolder(View itemLayoutView) {
             super(itemLayoutView);
-            tvName = (TextView) itemLayoutView.findViewById(R.id.tvName);
-            chkSelected = (CheckBox) itemLayoutView.findViewById(R.id.chkSelected);
+            ButterKnife.bind(this, itemLayoutView);
         }
     }
 
-    // method to access in activity after updating selection
     public ArrayList<Genres> getGenresList() {
         return gList;
     }

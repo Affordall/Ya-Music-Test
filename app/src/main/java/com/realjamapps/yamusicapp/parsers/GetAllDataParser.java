@@ -27,7 +27,8 @@ public class GetAllDataParser {
             = MediaType.parse("application/json; charset=utf-8");
 
     public void getDataPlease(final Context context) {
-        handler = new DatabaseHandler(context);
+        //handler = new DatabaseHandler(context);
+        handler = DatabaseHandler.getInstance(context);
 
         String serverData = null;
         OkHttpClient client = new OkHttpClient();
@@ -83,8 +84,6 @@ public class GetAllDataParser {
 
                 String jsonFormattedString = rawGenreString.replaceAll("\"|\\[|\\]", "");
 
-
-
                 List<String> eachGenreStringList =
                         Arrays.asList(jsonFormattedString.split("\\s*,\\s*"));
 
@@ -98,9 +97,6 @@ public class GetAllDataParser {
                     checkGenreExist(handler, "genres", "genres_name", eachGenreNameString);
                     genresList.add(eachGenreNameString);
                 }
-
-
-                // TODO: 29.03.16 Add if statement for catch exceptions
 
                 Performer item = new Performer();
 
@@ -127,7 +123,7 @@ public class GetAllDataParser {
                 handler.addPerformer(item);
             }
         } catch (JSONException e) {
-            e.printStackTrace(); // TODO: тоже залогировать или обработать надо
+            e.printStackTrace();
         }
     }
 }

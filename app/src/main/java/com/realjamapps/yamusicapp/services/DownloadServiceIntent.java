@@ -36,7 +36,8 @@ public class DownloadServiceIntent extends IntentService {
 
         final ResultReceiver receiver = intent.getParcelableExtra("receiver");
 
-        handler = new DatabaseHandler(this);
+        //handler = new DatabaseHandler(this);
+        handler = DatabaseHandler.getInstance(this);
 
         Bundle bundle = new Bundle();
 

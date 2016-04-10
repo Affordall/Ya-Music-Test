@@ -28,18 +28,21 @@ import com.realjamapps.yamusicapp.utils.Utils;
 
 import java.util.ArrayList;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
 import dmax.dialog.SpotsDialog;
 
 public class SearchResultsActivity extends AppCompatActivity {
 
-    private Toolbar mToolbar;
     private Menu menu;
-    RecyclerView mRecyclerView;
     private LinearLayoutManager mLayoutManager;
-    SpotsDialog dialog;
+    private SpotsDialog dialog;
     private MainGridAdapter mAdapter;
-    DatabaseHandler handler;
+    private DatabaseHandler handler;
     private ArrayList<Performer> mSearchPerformerList;
+
+    @Bind(R.id.search_result_list) RecyclerView mRecyclerView;
+    @Bind(R.id.toolbar_search) Toolbar mToolbar;
 
     @Nullable
     MainGridAdapter.OnItemClickListener onItemClickListener = new MainGridAdapter.OnItemClickListener() {
@@ -49,40 +52,13 @@ public class SearchResultsActivity extends AppCompatActivity {
 
             Intent transitionIntent = new Intent(SearchResultsActivity.this, DetailsActivity.class);
             transitionIntent.putExtra(DetailsActivity.EXTRA_PARAM_ID, position);
-
-            ImageView placeImage = (ImageView) v.findViewById(R.id.iv_image_url);
-            placeImage.setDrawingCacheEnabled(true);
-
-            //LinearLayout placeNameHolder = (LinearLayout) v.findViewById(R.id.placeNameHolder);
-            TextView placeNameHolder = (TextView) v.findViewById(R.id.tv_performer_name);
-
-            //RelativeLayout placePriceHolder = (RelativeLayout) v.findViewById(R.id.placePriceHolder);
-            //TransitionManager.setTransitionName(placePriceHolder, "tPriceHolder");
-
-
-            //View navigationBar = findViewById(android.R.id.navigationBarBackground);
-            //View statusBar = findViewById(android.R.id.statusBarBackground);
-
-
-            Pair<View, String> imagePair = Pair.create((View) placeImage, "tImage");
-            //Pair<View, String> holderPair = Pair.create((View) placeNameHolder, "tNameHolder");
-            //Pair<View, String> pricePair = Pair.create((View) placePriceHolder, "tPriceHolder");
-            //Pair<View, String> navPair = Pair.create(navigationBar, Window.NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME); //Shared elem is null
-            //Pair<View, String> statusPair = Pair.create(statusBar, Window.STATUS_BAR_BACKGROUND_TRANSITION_NAME);
-            Pair<View, String> toolbarPair = Pair.create((View) mToolbar, "tActionBar");
-
-            //ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(TestMain.this, imagePair, holderPair, navPair, statusPair, toolbarPair);
-            //ActivityOptionsCompat options = makeSceneTransitionAnimation(TestMain.this, imagePair, holderPair, navPair, statusPair, toolbarPair);
-            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(SearchResultsActivity.this, imagePair , toolbarPair);
-            ActivityCompat.startActivity(SearchResultsActivity.this, transitionIntent, options.toBundle());
+            startActivity(transitionIntent);
 
             //TODO: https://github.com/lgvalle/Material-Animations/
 
             // TODO: https://codeforandroid.wordpress.com/2015/02/09/android-sample-code/
 
             // TODO: https://github.com/code-computerlove/FastScrollRecyclerView/
-
-
         }
     };
 
@@ -90,12 +66,12 @@ public class SearchResultsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_results);
+        ButterKnife.bind(this);
 
         setUpSupportActionBar();
 
         mLayoutManager = new LinearLayoutManager(this);
 
-        mRecyclerView = (RecyclerView) findViewById(R.id.search_result_list);
         assert mRecyclerView != null;
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setHasFixedSize(true);
@@ -108,8 +84,8 @@ public class SearchResultsActivity extends AppCompatActivity {
         mRecyclerView.setAdapter(mAdapter);
         mAdapter.setOnItemClickListener(onItemClickListener);
 
-        /****/
-        handler = new DatabaseHandler(this);
+        //handler = new DatabaseHandler(this);
+        handler = DatabaseHandler.getInstance(this);
 
         handleIntent(getIntent());
     }
@@ -123,7 +99,6 @@ public class SearchResultsActivity extends AppCompatActivity {
 
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
-            //use the query to search your data somehow
             new SearchInDatabaseAT().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,query);
         }
     }
@@ -147,8 +122,7 @@ public class SearchResultsActivity extends AppCompatActivity {
     }
 
     private void setUpSupportActionBar() {
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        Utils.initToolBar(SearchResultsActivity.this, mToolbar, true, true, true, null); //false, null
+        Utils.initToolBar(SearchResultsActivity.this, mToolbar, true, true, true, getString(R.string.search_result));
     }
 
     /** SearchInDatabaseAT **/
@@ -163,9 +137,7 @@ public class SearchResultsActivity extends AppCompatActivity {
 
         @Override
         protected ArrayList<Performer> doInBackground(String... params) {
-
             return handler.getSearchResult(params);
-            //return handler.getSearchTestResult(params);
         }
 
         @Override

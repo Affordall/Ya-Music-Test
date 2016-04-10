@@ -7,29 +7,30 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.CompoundButton;
-import android.widget.RadioButton;
 import android.widget.Switch;
-import android.widget.Toast;
 
 import com.realjamapps.yamusicapp.R;
+import com.realjamapps.yamusicapp.utils.Utils;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
 
 public class SettingsActivity extends AppCompatActivity {
 
     public static final String APP_SETTINGS = "settings";
-    private Toolbar toolbar;
-    private Switch mSwitchSplash;
     int checkedNotifyIndex;
     public static final String KEY_SWITCH_NOTIFY_INDEX = "SAVED_SWITCH_NOTIFY_INDEX";
+
+    @Bind(R.id.switch_splash_screen) Switch mSwitchSplash;
+    @Bind(R.id.toolbar) Toolbar mToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+        ButterKnife.bind(this);
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        mSwitchSplash = (Switch) findViewById(R.id.switch_splash_screen);
+        setUpSupportActionBar();
 
         mSwitchSplash.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -47,13 +48,16 @@ public class SettingsActivity extends AppCompatActivity {
         LoadPreferences();
     }
 
+    private void setUpSupportActionBar() {
+        Utils.initToolBar(SettingsActivity.this, mToolbar, true, true, true, getString(R.string.settings_activity_title)); //false, null
+    }
+
     private void SavePreferences(String key, int value) {
         SharedPreferences sharedPreferences = getSharedPreferences(
                 APP_SETTINGS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt(key, value);
         editor.apply();
-        //showNotifyToast();
     }
 
     private void LoadPreferences() {
@@ -69,9 +73,5 @@ public class SettingsActivity extends AppCompatActivity {
             mSwitchSplash.setChecked(false);
         }
 
-    }
-
-    private void showNotifyToast() {
-        Toast.makeText(this, getString(R.string.settings_changed), Toast.LENGTH_SHORT).show();
     }
 }

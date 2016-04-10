@@ -8,6 +8,5 @@
         android:title="@string/share_via"
         android:icon="@android:drawable/ic_menu_share"
         app:showAsAction="always"
-        android:orderInCategory="300"
-        app:actionProviderClass="android.support.v7.widget.ShareActionProvider"/>
+        android:orderInCategory="300"/>
 </menu>

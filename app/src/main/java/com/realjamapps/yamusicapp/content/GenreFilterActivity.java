@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
 
+import com.facebook.drawee.view.SimpleDraweeView;
 import com.realjamapps.yamusicapp.R;
 import com.realjamapps.yamusicapp.adapters.GenresListViewAdapter;
 import com.realjamapps.yamusicapp.database.DatabaseHandler;
@@ -24,30 +25,35 @@ import com.realjamapps.yamusicapp.utils.Utils;
 
 import java.util.ArrayList;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
 import dmax.dialog.SpotsDialog;
 
 
 public class GenreFilterActivity extends AppCompatActivity {
 
-    private RecyclerView mRecyclerView;
     private GenresListViewAdapter mAdapter;
     private ArrayList<Genres> genresList;
     private SpotsDialog dialog;
     private DatabaseHandler handler;
-    private FloatingActionButton mFab;
+
+    @Bind(R.id.toolbar) Toolbar toolbar;
+    @Bind(R.id.rv_genres_filter) RecyclerView mRecyclerView;
+    @Bind(R.id.fabFilters) FloatingActionButton mFab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_filter);
+        ButterKnife.bind(this);
 
         setUpSupportActionBar();
 
-        handler = new DatabaseHandler(this);
+        //handler = new DatabaseHandler(this);
+        handler = DatabaseHandler.getInstance(this);
 
         genresList = new ArrayList<>();
 
-        mRecyclerView = (RecyclerView) findViewById(R.id.rv_genres_filter);
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this, null));
         assert mRecyclerView != null;
         mRecyclerView.setHasFixedSize(true);
@@ -60,8 +66,6 @@ public class GenreFilterActivity extends AppCompatActivity {
         if (isDBnotEmpty()) {
             startGenresFetcherTask();
         }
-
-        mFab = (FloatingActionButton)findViewById(R.id.fabFilters);
 
         assert mFab != null;
         mFab.setOnClickListener(new View.OnClickListener() {
@@ -119,7 +123,6 @@ public class GenreFilterActivity extends AppCompatActivity {
     }
 
     private void setUpSupportActionBar() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         Utils.initToolBar(GenreFilterActivity.this, toolbar, false, true, true, getString(R.string.title_filter_activity));
     }
 

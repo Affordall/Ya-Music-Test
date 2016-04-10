@@ -2,7 +2,7 @@ package com.realjamapps.yamusicapp.models;
 
 import java.util.List;
 
-public class Performer {
+public class Performer  {
 
     private int mId;
     private String mName;

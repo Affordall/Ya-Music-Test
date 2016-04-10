@@ -13,7 +13,7 @@
         app:showAsAction="always"
         android:orderInCategory="300"
         android:icon="@drawable/ic_filter_list_white_24dp"
-        android:title="Genre" />
+        android:title="@string/filter_genres" />
 
     <item
         android:id="@+id/action_settings"

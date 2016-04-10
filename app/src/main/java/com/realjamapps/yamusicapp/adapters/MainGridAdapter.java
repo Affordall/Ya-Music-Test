@@ -18,6 +18,9 @@ import com.realjamapps.yamusicapp.models.Performer;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 public class MainGridAdapter extends RecyclerView.Adapter<MainGridAdapter.ViewHolder> {
 
     private ArrayList<Performer> mItems;
@@ -84,20 +87,16 @@ public class MainGridAdapter extends RecyclerView.Adapter<MainGridAdapter.ViewHo
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        RelativeLayout placeMainHolder;
-        public TextView tv_performer_name, tv_performer_genres,
-                tv_performer_tracks_and_albums;
 
-        SimpleDraweeView draweeView;
+        @Bind(R.id.placeMainHolder) RelativeLayout placeMainHolder;
+        @Bind(R.id.tv_performer_name) TextView tv_performer_name;
+        @Bind(R.id.tv_performer_genres) TextView tv_performer_genres;
+        @Bind(R.id.tv_performer_tracks_and_albums) TextView  tv_performer_tracks_and_albums;
+        @Bind(R.id.iv_image_url) SimpleDraweeView draweeView;
 
         public ViewHolder(View itemView) {
             super(itemView);
-            placeMainHolder = (RelativeLayout) itemView.findViewById(R.id.placeMainHolder);
-            draweeView = (SimpleDraweeView) itemView.findViewById(R.id.iv_image_url);
-            tv_performer_name = (TextView) itemView.findViewById(R.id.tv_performer_name);
-            tv_performer_genres = (TextView) itemView.findViewById(R.id.tv_performer_genres);
-            tv_performer_tracks_and_albums = (TextView) itemView.findViewById(R.id.tv_performer_tracks_and_albums);
-
+            ButterKnife.bind(this, itemView);
             placeMainHolder.setOnClickListener(this);
         }
 
@@ -109,7 +108,4 @@ public class MainGridAdapter extends RecyclerView.Adapter<MainGridAdapter.ViewHo
             }
         }
     }
-
-
-
 }

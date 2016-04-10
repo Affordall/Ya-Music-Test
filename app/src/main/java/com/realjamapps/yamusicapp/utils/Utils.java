@@ -76,16 +76,6 @@ public class Utils {
         context.startService(intent);
     }
 
-    public static void shareIt(String title, String url) {
-        Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-        sharingIntent.setType("text/plain");
-        //sharingIntent.putExtra(Intent.EXTRA_SUBJECT, title);
-        sharingIntent.putExtra(Intent.EXTRA_TEXT, url);
-        Intent intent = Intent.createChooser(sharingIntent, mContext.getString(R.string.share_via));
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        mContext.startActivity(intent);
-    }
-
     public static boolean isLollipop() {
         return deviceAPI >= Build.VERSION_CODES.LOLLIPOP;
     }

@@ -13,12 +13,15 @@ import com.realjamapps.yamusicapp.listeners.GenresListener;
 import com.realjamapps.yamusicapp.listeners.PerformersListener;
 import com.realjamapps.yamusicapp.models.Genres;
 import com.realjamapps.yamusicapp.models.Performer;
+import com.realjamapps.yamusicapp.utils.YaMusicApp;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListener, GenresListener {
+
+    private static DatabaseHandler sInstance;
 
     private static final String DATABASE_NAME = "yamusicbase";
     private static final int DATABASE_VERSION = 1;
@@ -43,12 +46,31 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
     private static final String KEY_GENRES_NAME = "genres_name";
 
 
-    public DatabaseHandler(Context context) {
+   /* public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-    }
+    }*/
 
     public DatabaseHandler(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
+    }
+
+    /**
+     * Constructor should be private to prevent direct instantiation.
+     * make call to static method "getInstance()" instead.
+     */
+    private DatabaseHandler(Context context) {
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    }
+
+    public static synchronized DatabaseHandler getInstance(Context context) {
+
+        // Use the application context, which will ensure that you
+        // don't accidentally leak an Activity's context.
+        // See this article for more information: http://bit.ly/6LRzfx
+        if (sInstance == null) {
+            sInstance = new DatabaseHandler(YaMusicApp.getContext());
+        }
+        return sInstance;
     }
 
     // Database creation sql statement
@@ -154,7 +176,6 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
         SQLiteDatabase db = this.getWritableDatabase();
         try {
             ContentValues values = new ContentValues();
-            //values.put(KEY_GENRES_ID, genres.getId());
             values.put(KEY_GENRES_NAME, genres.getName());
 
             db.insert(TABLE_GENRES, null, values);
@@ -203,7 +224,6 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
     public ArrayList<Performer> getAllPerformers() {
         ArrayList<Performer> itemList = new ArrayList<>();
 
-        //String selectQuery = "SELECT  * FROM " + TABLE_ITEMS;
         String selectQuery =  "SELECT  * FROM " + TABLE_PERFORMERS + " ORDER BY "+ KEY_PERFORMER_NAME +" ASC";
 
         SQLiteDatabase db = this.getReadableDatabase();
@@ -264,53 +284,7 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
         return cursor.getInt(cursor.getColumnIndex(columnIndex));
     }
 
-    public ArrayList<Performer> getAllPerformersByGenreTest(String [] str) {
-        ArrayList<Performer> itemList = new ArrayList<>();
-
-        //String selectQuery = "SELECT  * FROM " + TABLE_PERFORMERS + " WHERE " + KEY_PERFORMER_GENRES + " IN " + "%cns";
-        String selectQuery = "SELECT  * FROM " + TABLE_PERFORMERS + " WHERE " + KEY_PERFORMER_GENRES + " IN " + "%cns";
-
-        StringBuilder cns = new StringBuilder();
-        cns.append("('");
-        for(int i = 0; i < str.length; i++) {
-            cns.append(String.valueOf(str[i]));
-            if (i < str.length - 1) {
-                cns.append("','");
-            }
-        }
-        cns.append("')");
-
-        String finalQuery = selectQuery.replaceAll("%cns", cns.toString());
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        Cursor cursor = db.rawQuery(finalQuery, null);
-        if (cursor.moveToFirst()) {
-            do {
-                Performer item = new Performer();
-
-                item.setmId(getIntCursor(cursor, KEY_ID));
-                item.setmName(getStringCursor(cursor, KEY_PERFORMER_NAME));
-
-                String genresString = getStringCursor(cursor, KEY_PERFORMER_GENRES);
-                List<String> genresList = Arrays.asList(genresString.split("\\s*,\\s*"));
-                item.setmGenres(genresList);
-
-                item.setmTracks(getIntCursor(cursor, KEY_COUNT_TRACKS));
-                item.setmAlbums(getIntCursor(cursor, KEY_COUNT_ALBUMS));
-                item.setmLink(getStringCursor(cursor, KEY_PERFORMER_LINK));
-                item.setmDescription(getStringCursor(cursor, KEY_DESCRIPTION));
-                item.setmCoverSmall(getStringCursor(cursor, KEY_COVER_SMALL));
-                item.setmCoverBig(getStringCursor(cursor, KEY_COVER_BIG));
-                itemList.add(item);
-
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
-        closeDB(db);
-        return itemList;
-    }
-
-    public ArrayList<Performer> getAllPerformersByGenre(String [] str) {
+    public ArrayList<Performer> getAllPerformersByGenre(String[] str) {
         ArrayList<Performer> itemList = new ArrayList<>();
 
         String selectQuery = "SELECT  * FROM " + TABLE_PERFORMERS + " WHERE " + KEY_PERFORMER_GENRES + " IN " + "%cns";
@@ -377,7 +351,6 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
         String[] columns = new String[] {KEY_PERFORMER_NAME};
         Cursor cursor = db.query(TABLE_PERFORMERS, columns, KEY_PERFORMER_NAME + " like ?",
                 new String[]{finalQuery}, null, null, null, null);
-                //new String[]{"'%" + Arrays.toString(wordsForSearch) + "%'"}, null, null, null, null);
 
         if (cursor.moveToFirst()) {
             do {
@@ -413,28 +386,6 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
         String selectQuery = "SELECT  * FROM " + TABLE_PERFORMERS + " WHERE "
                 + KEY_PERFORMER_NAME + " LIKE " + "(cast(" + "%cns" +" as text))";
 
-        /*String selectQuery = "SELECT * FROM " + TABLE_PERFORMERS +  " WHERE "
-                + "(" + KEY_PERFORMER_NAME + ")"
-                //+ " OR "
-                //+ "UPPER(" + KEY_CATEGORY_NAME + ")" + " OR "
-                //+ "UPPER(" + KEY_TEXT_SHORT + ")" + " OR "
-                //+ "UPPER(" + KEY_TEXT_FULL + ")"
-                //+ "LIKE " + "UPPER(" + "%cns" + ")";
-                //+ "%";
-                //+ KEY_TEXT_FULL
-                //+ " LIKE " + "'" + Arrays.toString(wordsForSearch) + "'";
-                + " LIKE " + "(" + "%cns" + ")";*/
-
-        /*StringBuilder cns = new StringBuilder();
-        cns.append("('");
-        for(int i = 0; i < wordsForSearch.length; i++) {
-            cns.append(String.valueOf(wordsForSearch[i]));
-            if (i < wordsForSearch.length - 1) {
-                cns.append("','");
-            }
-        }
-        cns.append("')");*/
-
         StringBuilder cns = new StringBuilder();
         cns.append("'%$");
         for(int i = 0; i < wordsForSearch.length; i++) {
@@ -445,33 +396,8 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
         }
         cns.append("%'");
 
-
-
-        //String selectQuery = "SELECT  * FROM " + TABLE_ITEMS + " WHERE " + KEY_IN_CART + "=?";
-
-        //String finalQuery = selectQuery.replaceAll("%cns", cns.toString());
-        //SQLiteDatabase db = this.getReadableDatabase();
-
-        //Cursor cursor = db.rawQuery(selectQuery, null);
-        //Cursor cursor = db.rawQuery(finalQuery, null);
-
-        //String finDescription = wordForSearch.substring(0, 1).toUpperCase() + wordForSearch.substring(1);
-
-
-
-
         SQLiteDatabase db = this.getReadableDatabase();
-        /*Cursor cursor = db.query(TABLE_PERFORMERS,
-                new String[]{KEY_ID,
-                        KEY_PERFORMER_NAME,
-                        KEY_PERFORMER_GENRES,
-                        KEY_COUNT_TRACKS,
-                        KEY_COUNT_ALBUMS,
-                        KEY_PERFORMER_LINK,
-                        KEY_DESCRIPTION,
-                        KEY_COVER_SMALL,
-                        KEY_COVER_BIG}, KEY_PERFORMER_NAME + "=?",
-                new String[] {finDescription}, null, null, null, null);*/
+
         String finalQuery = null;
         try {
             finalQuery = selectQuery.replaceAll("%cns", cns.toString());
@@ -481,8 +407,6 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
 
         assert finalQuery != null;
         Cursor cursor = db.rawQuery(finalQuery, null);
-        /*if (cursor != null)
-            cursor.moveToFirst();*/
         assert cursor != null;
         if (cursor.moveToFirst()) {
             do {
