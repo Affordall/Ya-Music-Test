@@ -62,11 +62,12 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
+    /**
+     * Use the application context, which will ensure that you
+     * don't accidentally leak an Activity's context.
+     * See this article for more information: http://bit.ly/6LRzfx
+     */
     public static synchronized DatabaseHandler getInstance(Context context) {
-
-        // Use the application context, which will ensure that you
-        // don't accidentally leak an Activity's context.
-        // See this article for more information: http://bit.ly/6LRzfx
         if (sInstance == null) {
             sInstance = new DatabaseHandler(YaMusicApp.getContext());
         }

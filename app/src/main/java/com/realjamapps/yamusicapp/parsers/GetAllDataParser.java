@@ -1,38 +1,48 @@
 package com.realjamapps.yamusicapp.parsers;
 
+import android.app.Application;
 import android.content.Context;
+import android.util.Log;
 
 import com.realjamapps.yamusicapp.database.DatabaseHandler;
 import com.realjamapps.yamusicapp.models.Genres;
 import com.realjamapps.yamusicapp.models.Performer;
+import com.squareup.okhttp.Cache;
+import com.squareup.okhttp.Interceptor;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class GetAllDataParser {
     private final String url = "http://cache-spb03.cdn.yandex.net/download.cdn.yandex.net/mobilization-2016/artists.json";
     private DatabaseHandler handler;
 
+    private static final int MAX_CACHE_SIZE = 10 * 1024 * 1024;
+
+    //private final OkHttpClient client = new OkHttpClient();
+
     public static final MediaType JSON
             = MediaType.parse("application/json; charset=utf-8");
 
     public void getDataPlease(final Context context) {
-        //handler = new DatabaseHandler(context);
         handler = DatabaseHandler.getInstance(context);
 
-        String serverData = null;
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = createCustomOkHttpClient(context);
 
+        String serverData = null;
         try {
             Request request = new Request.Builder()
                     .url(url)
@@ -53,7 +63,30 @@ public class GetAllDataParser {
         } else {
             return;
         }
+    }
 
+    private static OkHttpClient createCustomOkHttpClient(Context context) {
+        OkHttpClient okHttpClient = new OkHttpClient();
+        okHttpClient.setConnectTimeout(10, TimeUnit.SECONDS);
+        okHttpClient.setReadTimeout(10, TimeUnit.SECONDS);
+        okHttpClient.setWriteTimeout(10, TimeUnit.SECONDS);
+
+        // Install an HTTP cache in the application cache directory.
+        File cacheDir = new File(context.getCacheDir(), "responses");
+        Cache cache = new Cache(cacheDir, MAX_CACHE_SIZE);
+        okHttpClient.setCache(cache);
+
+        /** Dangerous interceptor that rewrites the server's cache-control header. */
+        okHttpClient.interceptors().add(new Interceptor() {
+            @Override public Response intercept(Chain chain) throws IOException {
+                Response originalResponse = chain.proceed(chain.request());
+                return originalResponse.newBuilder()
+                        .header("Cache-Control", "max-age=300")
+                        .build();
+            }
+        });
+
+        return okHttpClient;
     }
 
     private void checkGenreExist(DatabaseHandler handler, String TableName, String ColumnName,
