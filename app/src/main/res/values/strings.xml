@@ -27,6 +27,7 @@
 
     <string name="title_filter_activity">Choose the genres:</string>
     <string name="wrong_result">Wrong result</string>
+    <string name="getall_result">All genres</string>
     <string name="filter_genres">Filter genres</string>
 
     <string name="permission_question">You need to allow access to Last Known Location</string>
@@ -50,6 +51,7 @@
     <string name="transition_image_performer">image_performer</string>
 
     <string name="share_via">Share via</string>
+    <string name="select_all_genres">Select All</string>
 
     <string name="settings_checkbox_text">Show Splash Screen on start</string>
     <string name="settings_changed">Settings changed</string>

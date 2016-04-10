@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
     public static final String APP_SETTINGS = "settings";
     private final int REQUEST_CODE_ASK_PERMISSIONS = 123;
     private final int REQUEST_CODE_FILTERS = 1;
+    private final int RESULT_GETALL = 77;
     private Menu menu;
     private SpotsDialog dialog;
     private MainGridAdapter mAdapter;
@@ -119,8 +120,7 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
 
         if (isDBempty()) {
             Toast.makeText(this,"Load from DataBase",Toast.LENGTH_SHORT).show();
-            mPerformerList = handler.getAllPerformers();
-            mAdapter.refresh(mPerformerList);
+            getArtistAndRefreshAdapter();
         } else {
             checkInternetAndStartService();
         }
@@ -180,6 +180,11 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
         } else {
             Toast.makeText(this, getString(R.string.internet_is_off), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void getArtistAndRefreshAdapter() {
+            mPerformerList = handler.getAllPerformers();
+            mAdapter.refresh(mPerformerList);
     }
 
     @Override
@@ -318,11 +323,39 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
         }
     }
 
+    class SelectAllPerformers extends AsyncTask<String,Void,ArrayList<Performer>> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            dialog = new SpotsDialog(MainActivity.this, R.style.CustomProgressDialogStyle);
+            dialog.show();
+        }
+
+        @Override
+        protected ArrayList<Performer> doInBackground(String... params) {
+            return handler.getAllPerformersByGenre(params);
+
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<Performer> result) {
+            super.onPostExecute(result);
+            mAdapter.refresh(result);
+            dialog.dismiss();
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         SelectPerformerByGenreTask selectPerformerByGenreTask = new SelectPerformerByGenreTask();
+
+        if (resultCode == RESULT_GETALL) {
+            mPerformerList = null;
+            getArtistAndRefreshAdapter();
+        }
 
         if (resultCode == RESULT_OK) {
             switch (requestCode) {

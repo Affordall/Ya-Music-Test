@@ -13,9 +13,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AbsListView;
 
-import com.facebook.drawee.view.SimpleDraweeView;
 import com.realjamapps.yamusicapp.R;
 import com.realjamapps.yamusicapp.adapters.GenresListViewAdapter;
 import com.realjamapps.yamusicapp.database.DatabaseHandler;
@@ -36,6 +34,7 @@ public class GenreFilterActivity extends AppCompatActivity {
     private ArrayList<Genres> genresList;
     private SpotsDialog dialog;
     private DatabaseHandler handler;
+    private final int RESULT_GETALL = 77;
 
     @Bind(R.id.toolbar) Toolbar toolbar;
     @Bind(R.id.rv_genres_filter) RecyclerView mRecyclerView;
@@ -49,7 +48,6 @@ public class GenreFilterActivity extends AppCompatActivity {
 
         setUpSupportActionBar();
 
-        //handler = new DatabaseHandler(this);
         handler = DatabaseHandler.getInstance(this);
 
         genresList = new ArrayList<>();
@@ -132,6 +130,11 @@ public class GenreFilterActivity extends AppCompatActivity {
             case android.R.id.home:
                 onBackPressed();
                 return true;
+            case R.id.menu_item_select_all:
+                Intent returnIntent = new Intent();
+                setResult(RESULT_GETALL, returnIntent);
+                finish();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -140,8 +143,7 @@ public class GenreFilterActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.empty_menu, menu);
+        inflater.inflate(R.menu.menu_filters, menu);
         return true;
     }
-
 }
