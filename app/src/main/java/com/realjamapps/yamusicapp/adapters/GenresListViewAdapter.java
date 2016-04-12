@@ -20,8 +20,8 @@ public class GenresListViewAdapter extends RecyclerView.Adapter<GenresListViewAd
 
     private ArrayList<Genres> gList;
 
-    public GenresListViewAdapter(ArrayList<Genres> students) {
-        this.gList = students;
+    public GenresListViewAdapter(ArrayList<Genres> genres) {
+        this.gList = genres;
 
     }
 

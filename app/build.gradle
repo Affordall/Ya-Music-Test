@@ -28,6 +28,9 @@ android {
             debuggable true
         }
     }
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
 }
 
 dependencies {

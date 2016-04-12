@@ -60,23 +60,12 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
 
     @Nullable
     MainGridAdapter.OnItemClickListener onItemClickListener = new MainGridAdapter.OnItemClickListener() {
-        //@TargetApi(Build.VERSION_CODES.LOLLIPOP)
         @Override
         public void onItemClick(View v, int position) {
 
             Intent transitionIntent = new Intent(MainActivity.this, DetailsActivity.class);
             transitionIntent.putExtra(DetailsActivity.EXTRA_PARAM_ID, position);
             startActivity(transitionIntent);
-
-            //TODO: https://github.com/lgvalle/Material-Animations/
-
-            // TODO: https://codeforandroid.wordpress.com/2015/02/09/android-sample-code/
-
-            // TODO: https://github.com/code-computerlove/FastScrollRecyclerView/
-
-            // https://android-arsenal.com/details/3/2212 <<-- Nice
-
-
         }
     };
 
@@ -110,7 +99,6 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
         mRecyclerView.setAdapter(mAdapter);
         mAdapter.setOnItemClickListener(onItemClickListener);
 
-        //handler = new DatabaseHandler(this);
         handler = DatabaseHandler.getInstance(this);
 
         /* Initialize Download Service */
@@ -301,29 +289,6 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
      * return ArrayList<Item> as result
      * **/
     class SelectPerformerByGenreTask extends AsyncTask<String,Void,ArrayList<Performer>> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            dialog = new SpotsDialog(MainActivity.this, R.style.CustomProgressDialogStyle);
-            dialog.show();
-        }
-
-        @Override
-        protected ArrayList<Performer> doInBackground(String... params) {
-            return handler.getAllPerformersByGenre(params);
-
-        }
-
-        @Override
-        protected void onPostExecute(ArrayList<Performer> result) {
-            super.onPostExecute(result);
-            mAdapter.refresh(result);
-            dialog.dismiss();
-        }
-    }
-
-    class SelectAllPerformers extends AsyncTask<String,Void,ArrayList<Performer>> {
 
         @Override
         protected void onPreExecute() {

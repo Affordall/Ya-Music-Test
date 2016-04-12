@@ -38,5 +38,15 @@
     <string name="slide_fifth_title">Готовность к Android 6.0!</string>
     <string name="slide_fifth_text">Только анонимная статистика об ошибках!</string>
     <string name="share_via">Поделиться</string>
+    <string name="getall_result">Все жанры</string>
+    <string name="filter_genres">Фильтр по жанрам</string>
+    <string name="search_result">Найдено:</string>
+    <string name="select_all_genres">Выбрать все</string>
+    <string name="settings_activity_title">Настройки</string>
+    <string name="settings_changed">Настройки изменены</string>
+    <string name="settings_checkbox_text">Показывать Заставку при старте приложения</string>
+    <string name="transition_image_performer">image_performer</string>
+    <string name="transition_name_performer">name_performer</string>
+    <string name="wrong_input">Некорректный запрос</string>
 
 </resources>

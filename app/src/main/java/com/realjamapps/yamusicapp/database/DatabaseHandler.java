@@ -331,55 +331,6 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
     }
 
 
-    public ArrayList<Performer> getSearchTestResult(String[] wordsForSearch) {
-
-        ArrayList<Performer> itemList = new ArrayList<>();
-
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        StringBuilder cns = new StringBuilder();
-        cns.append("'%$");
-        for(int i = 0; i < wordsForSearch.length; i++) {
-            cns.append(String.valueOf(wordsForSearch[i]));
-            if (i < wordsForSearch.length - 1) {
-                cns.append("%','%$");
-            }
-        }
-        cns.append("%'");
-
-        String finalQuery = cns.toString();
-
-        String[] columns = new String[] {KEY_PERFORMER_NAME};
-        Cursor cursor = db.query(TABLE_PERFORMERS, columns, KEY_PERFORMER_NAME + " like ?",
-                new String[]{finalQuery}, null, null, null, null);
-
-        if (cursor.moveToFirst()) {
-            do {
-                Performer item = new Performer();
-
-                item.setmId(getIntCursor(cursor, KEY_ID));
-                item.setmName(getStringCursor(cursor, KEY_PERFORMER_NAME));
-
-                String genresString = getStringCursor(cursor, KEY_PERFORMER_GENRES);
-                List<String> genresList = Arrays.asList(genresString.split("\\s*,\\s*"));
-                item.setmGenres(genresList);
-
-                item.setmTracks(getIntCursor(cursor, KEY_COUNT_TRACKS));
-                item.setmAlbums(getIntCursor(cursor, KEY_COUNT_ALBUMS));
-                item.setmLink(getStringCursor(cursor, KEY_PERFORMER_LINK));
-                item.setmDescription(getStringCursor(cursor, KEY_DESCRIPTION));
-                item.setmCoverSmall(getStringCursor(cursor, KEY_COVER_SMALL));
-                item.setmCoverBig(getStringCursor(cursor, KEY_COVER_BIG));
-
-                itemList.add(item);
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
-        closeDB(db);
-        return itemList;
-    }
-
-
     public ArrayList<Performer> getSearchResult(String[] wordsForSearch) {
 
         ArrayList<Performer> itemList = new ArrayList<>();

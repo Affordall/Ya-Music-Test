@@ -5,9 +5,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,8 +14,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import com.realjamapps.yamusicapp.R;
 import com.realjamapps.yamusicapp.adapters.MainGridAdapter;
@@ -27,6 +23,8 @@ import com.realjamapps.yamusicapp.models.Performer;
 import com.realjamapps.yamusicapp.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -53,12 +51,6 @@ public class SearchResultsActivity extends AppCompatActivity {
             Intent transitionIntent = new Intent(SearchResultsActivity.this, DetailsActivity.class);
             transitionIntent.putExtra(DetailsActivity.EXTRA_PARAM_ID, position);
             startActivity(transitionIntent);
-
-            //TODO: https://github.com/lgvalle/Material-Animations/
-
-            // TODO: https://codeforandroid.wordpress.com/2015/02/09/android-sample-code/
-
-            // TODO: https://github.com/code-computerlove/FastScrollRecyclerView/
         }
     };
 
@@ -84,7 +76,6 @@ public class SearchResultsActivity extends AppCompatActivity {
         mRecyclerView.setAdapter(mAdapter);
         mAdapter.setOnItemClickListener(onItemClickListener);
 
-        //handler = new DatabaseHandler(this);
         handler = DatabaseHandler.getInstance(this);
 
         handleIntent(getIntent());
@@ -99,7 +90,11 @@ public class SearchResultsActivity extends AppCompatActivity {
 
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
-            new SearchInDatabaseAT().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,query);
+            if (isAlpha(query)) {
+                new SearchInDatabaseAT().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,query);
+            } else {
+                Toast.makeText(SearchResultsActivity.this, getString(R.string.wrong_input), Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -146,5 +141,21 @@ public class SearchResultsActivity extends AppCompatActivity {
             mAdapter.refresh(result);
             dialog.dismiss();
         }
+    }
+
+    /**
+     * Method to check input string for both alphabets via regex.
+     * @param name
+     * @return boolean
+     */
+    public boolean isAlpha(String name) {
+        Pattern pattern = Pattern.compile(
+                "[" +
+                        "а-яА-ЯёЁ" +
+                        "a-zA-Z" +
+                        "]" +
+                        "*");
+        Matcher matcher = pattern.matcher(name);
+        return matcher.matches();
     }
 }

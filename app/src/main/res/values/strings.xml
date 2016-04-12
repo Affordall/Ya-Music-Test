@@ -27,6 +27,7 @@
 
     <string name="title_filter_activity">Choose the genres:</string>
     <string name="wrong_result">Wrong result</string>
+    <string name="wrong_input">Wrong input</string>
     <string name="getall_result">All genres</string>
     <string name="filter_genres">Filter genres</string>
 
