@@ -44,7 +44,6 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
 
     private LinearLayoutManager mLayoutManager;
     public static final String APP_SETTINGS = "settings";
-    private final int REQUEST_CODE_ASK_PERMISSIONS = 123;
     private final int REQUEST_CODE_FILTERS = 1;
     private final int RESULT_GETALL = 77;
     private Menu menu;
@@ -105,9 +104,7 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
         mReceiver = new DownloadResultReceiver(new Handler());
         mReceiver.setReceiver(this);
 
-
         if (isDBempty()) {
-            Toast.makeText(this,"Load from DataBase",Toast.LENGTH_SHORT).show();
             getArtistAndRefreshAdapter();
         } else {
             checkInternetAndStartService();
@@ -125,22 +122,7 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
                 android.R.color.holo_green_dark,
                 android.R.color.holo_orange_dark,
                 android.R.color.holo_red_dark);
-
-        if (Utils.isLollipop()) {
-            //setupWindowAnimations();
-        }
     }
-
-    /*@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void setupWindowAnimations() {
-        Fade fade = new Fade();
-        fade.setDuration(1000);
-        getWindow().setExitTransition(fade);
-
-        Slide slide = new Slide();
-        slide.setDuration(1000);
-        getWindow().setReturnTransition(slide);
-    }*/
 
     private boolean isDBempty() {
         return handler.getPerformersCount() !=0;
@@ -341,22 +323,4 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
             Toast.makeText(MainActivity.this, getString(R.string.wrong_result), Toast.LENGTH_LONG).show();
         }
     }
-
-    /*@Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_CODE_ASK_PERMISSIONS:
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // Permission Granted
-                    Toast.makeText(MainActivity.this, getString(R.string.perm_access_granted), Toast.LENGTH_LONG).show();
-                } else {
-                    // Permission Denied
-                    Toast.makeText(MainActivity.this, getString(R.string.perm_access_denied), Toast.LENGTH_LONG).show();
-                }
-                break;
-            default:
-                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
-    }*/
-
 }

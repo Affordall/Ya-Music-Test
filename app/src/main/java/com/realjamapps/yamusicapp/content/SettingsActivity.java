@@ -49,7 +49,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void setUpSupportActionBar() {
-        Utils.initToolBar(SettingsActivity.this, mToolbar, true, true, true, getString(R.string.settings_activity_title)); //false, null
+        Utils.initToolBar(SettingsActivity.this, mToolbar, true, true, true, getString(R.string.settings_activity_title));
     }
 
     private void SavePreferences(String key, int value) {

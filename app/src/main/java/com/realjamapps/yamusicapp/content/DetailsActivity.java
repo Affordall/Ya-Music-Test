@@ -58,19 +58,17 @@ public class DetailsActivity extends AppCompatActivity {
         assert draweeView != null;
         draweeView.setDrawingCacheEnabled(true);
 
-        //handler = new DatabaseHandler(DetailsActivity.this);
         handler = DatabaseHandler.getInstance(this);
 
-        new GetItemByIdAT().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, String.valueOf(gotId));
-
-        if (Utils.isLollipop()) {
-            //windowTransition();
-            //setupWindowAnimations();
-        }
+        startGetItemAT(gotId);
     }
 
     private void setUpSupportActionBar() {
-        Utils.initToolBar(DetailsActivity.this, mToolbar, true, true, true, null); //false, null
+        Utils.initToolBar(DetailsActivity.this, mToolbar, true, true, true, null);
+    }
+
+    private AsyncTask startGetItemAT(int intent_id) {
+        return new GetItemByIdAT().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, String.valueOf(intent_id));
     }
 
     public class GetItemByIdAT extends AsyncTask<String, Void, Performer> {
@@ -107,12 +105,17 @@ public class DetailsActivity extends AppCompatActivity {
 
             String ascii="  \u00B7  ";
 
+            int albumsCount = result.getmAlbums();
+            int tracksCount = result.getmTracks();
+            String quantityAlbums = getResources().getQuantityString(R.plurals.plurals_albums, albumsCount);
+            String quantityTracks = getResources().getQuantityString(R.plurals.plurals_tracks, tracksCount);
+
             tracksAlbumsString = (
-                    String.valueOf(result.getmAlbums())
-                    + " " + getString(R.string.albums)
+                    String.valueOf(albumsCount)
+                    + " " + quantityAlbums
                     + ascii
-                    + String.valueOf(result.getmTracks())
-                    + " " + getString(R.string.tracks));
+                    + String.valueOf(tracksCount)
+                    + " " + quantityTracks);
             mTracksAndAlbums.setText(tracksAlbumsString);
 
             String description = result.getmDescription();
@@ -154,7 +157,7 @@ public class DetailsActivity extends AppCompatActivity {
         shareIntent.setType("image/*");
         shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-        startActivityForResult(Intent.createChooser(shareIntent, "Share Artist"),
+        startActivityForResult(Intent.createChooser(shareIntent, getString(R.string.share_via)),
                 CAMERA_PIC_REQUEST);
     }
 

@@ -5,7 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteStatement;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -44,11 +46,6 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
     // Genres Table Columns names
     private static final String KEY_GENRES_ID = "genres_id";
     private static final String KEY_GENRES_NAME = "genres_name";
-
-
-   /* public DatabaseHandler(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
-    }*/
 
     public DatabaseHandler(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
@@ -151,38 +148,77 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
     @Override
     public void addPerformer(Performer perf) {
 
-        SQLiteDatabase db = this.getWritableDatabase();
-        try {
-            ContentValues values = new ContentValues();
-            values.put(KEY_ID, perf.getmId());
-            values.put(KEY_PERFORMER_NAME, perf.getmName());
-            values.put(KEY_PERFORMER_GENRES, TextUtils.join(", ", perf.getmGenres()));
-            values.put(KEY_COUNT_TRACKS, perf.getmTracks());
-            values.put(KEY_COUNT_ALBUMS, perf.getmAlbums());
-            values.put(KEY_PERFORMER_LINK, perf.getmLink());
-            values.put(KEY_DESCRIPTION, perf.getmDescription());
-            values.put(KEY_COVER_SMALL, perf.getmCoverSmall());
-            values.put(KEY_COVER_BIG, perf.getmCoverBig());
+        String sql = "INSERT OR REPLACE INTO " + TABLE_PERFORMERS +
+                " ( " + KEY_ID +
+                ", " + KEY_PERFORMER_NAME +
+                ", " + KEY_PERFORMER_GENRES +
+                ", " + KEY_COUNT_TRACKS +
+                ", " + KEY_COUNT_ALBUMS +
+                ", " + KEY_PERFORMER_LINK +
+                ", " + KEY_DESCRIPTION +
+                ", " + KEY_COVER_SMALL +
+                ", " + KEY_COVER_BIG +
+                " ) " + "VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-            db.insert(TABLE_PERFORMERS, null, values);
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.beginTransactionNonExclusive();
+        SQLiteStatement stmt = db.compileStatement(sql);
+        try {
+            try {
+                stmt.bindLong(1, perf.getmId());
+                stmt.bindString(2, perf.getmName());
+                stmt.bindString(3, TextUtils.join(", ", perf.getmGenres()));
+                stmt.bindLong(4, perf.getmTracks());
+                stmt.bindLong(5, perf.getmAlbums());
+                if(perf.getmLink() != null) {
+                    stmt.bindString(6, perf.getmLink());
+                } else {
+                    stmt.bindNull(6);
+                }
+                stmt.bindString(7, perf.getmDescription());
+                stmt.bindString(8, perf.getmCoverSmall());
+                stmt.bindString(9, perf.getmCoverBig());
+
+                stmt.execute();
+                stmt.clearBindings();
+
+                db.setTransactionSuccessful();
+            } catch (SQLiteException e) {
+                e.printStackTrace();
+            }
+        } finally {
+            db.endTransaction();
+            //stmt.close();
             closeDB(db);
-        } catch (Exception e) {
-            Log.e("problem", e + "");
         }
     }
 
     @Override
     public void addGenres(Genres genres) {
+        String sql = "INSERT OR REPLACE INTO " + TABLE_GENRES +
+                " ( " + KEY_GENRES_NAME +
+                " ) " + "VALUES ( ? )";
 
         SQLiteDatabase db = this.getWritableDatabase();
-        try {
-            ContentValues values = new ContentValues();
-            values.put(KEY_GENRES_NAME, genres.getName());
 
-            db.insert(TABLE_GENRES, null, values);
+        db.beginTransactionNonExclusive();
+        SQLiteStatement stmt = db.compileStatement(sql);
+        try {
+            try {
+                stmt.bindString(1, genres.getName());
+
+                stmt.execute();
+                stmt.clearBindings();
+
+                db.setTransactionSuccessful();
+            } catch (SQLiteException e) {
+                e.printStackTrace();
+            }
+        } finally {
+            db.endTransaction();
+            //stmt.close();
             closeDB(db);
-        } catch (Exception e) {
-            Log.e("problem", e + "");
         }
     }
 
@@ -288,21 +324,21 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
     public ArrayList<Performer> getAllPerformersByGenre(String[] str) {
         ArrayList<Performer> itemList = new ArrayList<>();
 
-        String selectQuery = "SELECT  * FROM " + TABLE_PERFORMERS + " WHERE " + KEY_PERFORMER_GENRES + " IN " + "%cns";
+        String selectQuery = "SELECT  * FROM " + TABLE_PERFORMERS + " WHERE "
+                + KEY_PERFORMER_GENRES + " LIKE " + "%cns";
 
         StringBuilder cns = new StringBuilder();
-        cns.append("('");
+        cns.append("'%");
         for(int i = 0; i < str.length; i++) {
             cns.append(String.valueOf(str[i]));
             if (i < str.length - 1) {
-                cns.append("','");
+                cns.append("%' OR " + KEY_PERFORMER_GENRES + " LIKE '%");
             }
         }
-        cns.append("')");
-
+        cns.append("%'");
         String finalQuery = selectQuery.replaceAll("%cns", cns.toString());
-        SQLiteDatabase db = this.getReadableDatabase();
 
+        SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(finalQuery, null);
         if (cursor.moveToFirst()) {
             do {

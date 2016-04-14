@@ -1,8 +1,6 @@
 package com.realjamapps.yamusicapp.parsers;
 
-import android.app.Application;
 import android.content.Context;
-import android.util.Log;
 
 import com.realjamapps.yamusicapp.database.DatabaseHandler;
 import com.realjamapps.yamusicapp.models.Genres;
@@ -31,8 +29,6 @@ public class GetAllDataParser {
     private DatabaseHandler handler;
 
     private static final int MAX_CACHE_SIZE = 10 * 1024 * 1024;
-
-    //private final OkHttpClient client = new OkHttpClient();
 
     public static final MediaType JSON
             = MediaType.parse("application/json; charset=utf-8");

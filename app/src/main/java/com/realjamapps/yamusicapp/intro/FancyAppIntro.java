@@ -45,16 +45,16 @@ public class FancyAppIntro extends AppIntro2 {
                     getString(R.string.slide_four_title),
                     getString(R.string.slide_four_text),
                     R.mipmap.ic_launcher,
-                    ContextCompat.getColor(this, R.color.colorPrimaryLight)));
+                    ContextCompat.getColor(this, R.color.colorPrimary)));
 
             /** "Permissions" for Android 6.0 */
             addSlide(AppIntroFragment.newInstance(
                     getString(R.string.slide_fifth_title),
                     getString(R.string.slide_fifth_text),
                     R.mipmap.ic_launcher,
-                    ContextCompat.getColor(this, R.color.colorPrimary)));
+                    ContextCompat.getColor(this, R.color.colorPrimaryDark)));
 
-            askForPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 2);
+            askForPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 2);
 
 
         } catch (OutOfMemoryError e) {

@@ -90,7 +90,6 @@ public class Splashscreen extends AppCompatActivity {
             }
         };
         splashTread.start();
-
     }
 
     private void finishThisAndRunMain() {

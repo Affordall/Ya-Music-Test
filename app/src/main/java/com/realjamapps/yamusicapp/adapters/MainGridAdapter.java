@@ -66,10 +66,16 @@ public class MainGridAdapter extends RecyclerView.Adapter<MainGridAdapter.ViewHo
         String genresString = TextUtils.join(", ", genres);
         holder.tv_performer_genres.setText(genresString);
 
-        String tracksAlbumsString = (String.valueOf(performer.getmAlbums())+ " "
-                + mContext.getString(R.string.albums) + ", "
-                + String.valueOf(performer.getmTracks()) + " "
-                + mContext.getString(R.string.tracks));
+        int albumsCount = performer.getmAlbums();
+        int tracksCount = performer.getmTracks();
+        String quantityAlbums = mContext.getResources().getQuantityString(R.plurals.plurals_albums, albumsCount);
+        String quantityTracks = mContext.getResources().getQuantityString(R.plurals.plurals_tracks, tracksCount);
+
+        String tracksAlbumsString = (String.valueOf(albumsCount)+ " "
+                + quantityAlbums + ", "
+                + String.valueOf(tracksCount) + " "
+                + quantityTracks);
+
         holder.tv_performer_tracks_and_albums.setText(tracksAlbumsString);
     }
 

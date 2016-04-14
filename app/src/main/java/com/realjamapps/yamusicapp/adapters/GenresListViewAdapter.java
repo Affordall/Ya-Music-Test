@@ -37,8 +37,7 @@ public class GenresListViewAdapter extends RecyclerView.Adapter<GenresListViewAd
         View itemLayoutView = LayoutInflater.from(parent.getContext()).inflate(
                 R.layout.filter_genre, null);
 
-        ViewHolder viewHolder = new ViewHolder(itemLayoutView);
-        return viewHolder;
+        return new ViewHolder(itemLayoutView);
     }
 
     @Override

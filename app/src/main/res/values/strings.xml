@@ -31,10 +31,6 @@
     <string name="getall_result">All genres</string>
     <string name="filter_genres">Filter genres</string>
 
-    <string name="permission_question">You need to allow access to Last Known Location</string>
-    <string name="perm_access_granted">Thank you! Now you can use the app without any limits!</string>
-    <string name="perm_access_denied">ACCESS_COARSE_LOCATION Denied!</string>
-
     <string name="oops_error">Oops! Sorry! Something went wrong..</string>
 
     <string name="slide_one_text">Enjoy your stay! :)</string>
@@ -43,7 +39,7 @@
     <string name="slide_two_title">Simpleness</string>
     <string name="slide_three_text">Click on the  card and see more information!</string>
     <string name="slide_three_title">Completeness</string>
-    <string name="slide_four_text">Genres filter is up to you!</string>
+    <string name="slide_four_text">Use filter for favorite Artists!</string>
     <string name="slide_four_title">Convenience</string>
     <string name="slide_fifth_title">Android 6.0 Ready!</string>
     <string name="slide_fifth_text">No personal info. Just anon. statistics!</string>
@@ -57,5 +53,17 @@
     <string name="settings_checkbox_text">Show Splash Screen on start</string>
     <string name="settings_changed">Settings changed</string>
     <string name="settings_activity_title">Settings</string>
+
+    <plurals name="plurals_albums">
+        <item quantity="zero">no albums</item>
+        <item quantity="one">album</item>
+        <item quantity="other">albums</item>
+    </plurals>
+
+    <plurals name="plurals_tracks">
+        <item quantity="zero">no tracks</item>
+        <item quantity="one">track</item>
+        <item quantity="other">tracks</item>
+    </plurals>
 
 </resources>
