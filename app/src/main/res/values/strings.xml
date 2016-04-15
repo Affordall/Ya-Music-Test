@@ -23,7 +23,7 @@
     <string name="search_hint">Apocalyptica</string>
     <string name="search_title">Search</string>
     <string name="no_records">There are no artist</string>
-    <string name="search_result">Search result: </string>
+    <string name="search_result">Found: </string>
 
     <string name="title_filter_activity">Choose the genres:</string>
     <string name="wrong_result">Wrong result</string>
