@@ -30,28 +30,28 @@ public class FancyAppIntro extends AppIntro2 {
             addSlide(AppIntroFragment.newInstance(
                     getString(R.string.slide_one_title),
                     getString(R.string.app_name),
-                    R.mipmap.ic_launcher,
-                    ContextCompat.getColor(this, R.color.colorPrimary)));
+                    R.drawable.source,
+                    ContextCompat.getColor(this, R.color.colorPrimaryDark)));
 
             /** Pull to Refresh */
             addSlide(AppIntroFragment.newInstance(
                     getString(R.string.slide_two_title),
                     getString(R.string.slide_two_text),
-                    R.mipmap.ic_launcher,
-                    ContextCompat.getColor(this, R.color.colorPrimaryDark)));
+                    R.drawable.intro_png_pull,
+                    ContextCompat.getColor(this, R.color.colorPrimary)));
 
             /** Use filters */
             addSlide(AppIntroFragment.newInstance(
                     getString(R.string.slide_four_title),
                     getString(R.string.slide_four_text),
-                    R.mipmap.ic_launcher,
+                    R.drawable.intro_png_filters,
                     ContextCompat.getColor(this, R.color.colorPrimary)));
 
             /** "Permissions" for Android 6.0 */
             addSlide(AppIntroFragment.newInstance(
                     getString(R.string.slide_fifth_title),
                     getString(R.string.slide_fifth_text),
-                    R.mipmap.ic_launcher,
+                    R.drawable.intro_png_details,
                     ContextCompat.getColor(this, R.color.colorPrimaryDark)));
 
             askForPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 2);

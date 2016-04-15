@@ -139,6 +139,8 @@ public class SearchResultsActivity extends AppCompatActivity {
         protected void onPostExecute(ArrayList<Performer> result) {
             super.onPostExecute(result);
             mAdapter.refresh(result);
+            assert getSupportActionBar() != null;
+            getSupportActionBar().setTitle(getString(R.string.search_result) + " " + result.size());
             dialog.dismiss();
         }
     }
