@@ -1,5 +1,6 @@
 package com.realjamapps.yamusicapp.database;
 
+import android.annotation.TargetApi;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -8,6 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -15,11 +17,13 @@ import com.realjamapps.yamusicapp.listeners.GenresListener;
 import com.realjamapps.yamusicapp.listeners.PerformersListener;
 import com.realjamapps.yamusicapp.models.Genres;
 import com.realjamapps.yamusicapp.models.Performer;
-import com.realjamapps.yamusicapp.utils.YaMusicApp;
+import com.realjamapps.yamusicapp.models.PerformerBuilder;
+import com.realjamapps.yamusicapp.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListener, GenresListener {
 
@@ -66,7 +70,7 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
      */
     public static synchronized DatabaseHandler getInstance(Context context) {
         if (sInstance == null) {
-            sInstance = new DatabaseHandler(YaMusicApp.getContext());
+            sInstance = new DatabaseHandler(context);
         }
         return sInstance;
     }
@@ -114,7 +118,7 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
         db.close();
     }
 
-    public Boolean doIt(String TableName, String ColumnName, String ColumnData) {
+    public Boolean checkIfRecordExist(String TableName, String ColumnName, String ColumnData) {
         boolean outValue = false;
         try {
             outValue = doesRecordExist(TableName, ColumnName, ColumnData);
@@ -163,35 +167,7 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
         SQLiteDatabase db = this.getWritableDatabase();
 
         db.beginTransactionNonExclusive();
-        SQLiteStatement stmt = db.compileStatement(sql);
-        try {
-            try {
-                stmt.bindLong(1, perf.getmId());
-                stmt.bindString(2, perf.getmName());
-                stmt.bindString(3, TextUtils.join(", ", perf.getmGenres()));
-                stmt.bindLong(4, perf.getmTracks());
-                stmt.bindLong(5, perf.getmAlbums());
-                if(perf.getmLink() != null) {
-                    stmt.bindString(6, perf.getmLink());
-                } else {
-                    stmt.bindNull(6);
-                }
-                stmt.bindString(7, perf.getmDescription());
-                stmt.bindString(8, perf.getmCoverSmall());
-                stmt.bindString(9, perf.getmCoverBig());
-
-                stmt.execute();
-                stmt.clearBindings();
-
-                db.setTransactionSuccessful();
-            } catch (SQLiteException e) {
-                e.printStackTrace();
-            }
-        } finally {
-            db.endTransaction();
-            //stmt.close();
-            closeDB(db);
-        }
+        runSqlStatementDependingByApiVersion(db, sql, perf);
     }
 
     @Override
@@ -203,22 +179,81 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
         SQLiteDatabase db = this.getWritableDatabase();
 
         db.beginTransactionNonExclusive();
+        runSqlStatementDependingByApiVersion(db, sql, genres);
+    }
+
+    private void runSqlStatementDependingByApiVersion(SQLiteDatabase db, String sql, Object incomeObj) {
+        if (Utils.isKitkat()) {
+            newApiSqlStatement(db, sql, incomeObj);
+        } else {
+            oldApiSqlStatement(db, sql, incomeObj);
+        }
+    }
+
+    private void oldApiSqlStatement(SQLiteDatabase db, String sql, Object incomeObj) {
         SQLiteStatement stmt = db.compileStatement(sql);
         try {
-            try {
-                stmt.bindString(1, genres.getName());
-
-                stmt.execute();
-                stmt.clearBindings();
-
-                db.setTransactionSuccessful();
-            } catch (SQLiteException e) {
-                e.printStackTrace();
-            }
+            validateIncomingInstance(db, stmt, incomeObj);
         } finally {
             db.endTransaction();
-            //stmt.close();
+            stmt.close();
             closeDB(db);
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    private void newApiSqlStatement(SQLiteDatabase db, String sql, Object incomeObj) {
+        try (SQLiteStatement stmt = db.compileStatement(sql)) {
+            validateIncomingInstance(db, stmt, incomeObj);
+        } finally {
+            db.endTransaction();
+            closeDB(db);
+        }
+    }
+
+    private void validateIncomingInstance(SQLiteDatabase db, SQLiteStatement stmt, Object incomeObj) {
+        if (incomeObj instanceof Performer) {
+            commonSqlStatementPerformer(db, stmt, (Performer)incomeObj);
+        } else if (incomeObj instanceof Genres) {
+            commonSqlStatementGenres(db, stmt, (Genres)incomeObj);
+        }
+    }
+
+    private void commonSqlStatementPerformer(SQLiteDatabase db, SQLiteStatement stmt, Performer perf) {
+        try {
+            stmt.bindLong(1, perf.getmId());
+            stmt.bindString(2, perf.getmName());
+            stmt.bindString(3, TextUtils.join(", ", perf.getmGenres()));
+            stmt.bindLong(4, perf.getmTracks());
+            stmt.bindLong(5, perf.getmAlbums());
+            if (perf.getmLink() != null) {
+                stmt.bindString(6, perf.getmLink());
+            } else {
+                stmt.bindNull(6);
+            }
+            stmt.bindString(7, perf.getmDescription());
+            stmt.bindString(8, perf.getmCoverSmall());
+            stmt.bindString(9, perf.getmCoverBig());
+
+            stmt.execute();
+            stmt.clearBindings();
+
+            db.setTransactionSuccessful();
+        } catch (SQLiteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void commonSqlStatementGenres(SQLiteDatabase db, SQLiteStatement stmt, Genres genres) {
+        try {
+            stmt.bindString(1, genres.getName());
+
+            stmt.execute();
+            stmt.clearBindings();
+
+            db.setTransactionSuccessful();
+        } catch (SQLiteException e) {
+            e.printStackTrace();
         }
     }
 
@@ -237,20 +272,7 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
                 new String[]{String.valueOf(id)}, null, null, null, null);
         if (cursor != null)
             cursor.moveToFirst();
-
-        String genresGetString = getStringCursor(cursor, KEY_PERFORMER_GENRES);
-        List<String> genresGetList = Arrays.asList(genresGetString.split("\\s*,\\s*"));
-
-        Performer single_item = new Performer(getIntCursor(cursor, KEY_ID),
-                getStringCursor(cursor, KEY_PERFORMER_NAME),
-                genresGetList,
-                getIntCursor(cursor, KEY_COUNT_TRACKS),
-                getIntCursor(cursor, KEY_COUNT_ALBUMS),
-                getStringCursor(cursor, KEY_PERFORMER_LINK),
-                getStringCursor(cursor, KEY_DESCRIPTION),
-                getStringCursor(cursor, KEY_COVER_SMALL),
-                getStringCursor(cursor, KEY_COVER_BIG));
-
+            Performer single_item = createNewPerformerByCursor(cursor);
         if (cursor != null)
             cursor.close();
         closeDB(db);
@@ -259,7 +281,7 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
 
     @Override
     public ArrayList<Performer> getAllPerformers() {
-        ArrayList<Performer> itemList = new ArrayList<>();
+        ArrayList<Performer> itemList = Utils.newInstancePerformer();
 
         String selectQuery =  "SELECT  * FROM " + TABLE_PERFORMERS + " ORDER BY "+ KEY_PERFORMER_NAME +" ASC";
 
@@ -268,21 +290,7 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
 
         if (cursor.moveToFirst()) {
             do {
-                Performer item = new Performer();
-                item.setmId(getIntCursor(cursor, KEY_ID));
-                item.setmName(getStringCursor(cursor, KEY_PERFORMER_NAME));
-
-                String genresString = getStringCursor(cursor, KEY_PERFORMER_GENRES);
-                List<String> genresList = Arrays.asList(genresString.split("\\s*,\\s*"));
-                item.setmGenres(genresList);
-
-                item.setmTracks(getIntCursor(cursor, KEY_COUNT_TRACKS));
-                item.setmAlbums(getIntCursor(cursor, KEY_COUNT_ALBUMS));
-                item.setmLink(getStringCursor(cursor, KEY_PERFORMER_LINK));
-                item.setmDescription(getStringCursor(cursor, KEY_DESCRIPTION));
-                item.setmCoverSmall(getStringCursor(cursor, KEY_COVER_SMALL));
-                item.setmCoverBig(getStringCursor(cursor, KEY_COVER_BIG));
-
+                Performer item = createNewPerformerByCursor(cursor);
                 itemList.add(item);
             } while (cursor.moveToNext());
         }
@@ -293,7 +301,7 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
 
     @Override
     public ArrayList<Genres> getAllGenres() {
-        ArrayList<Genres> genresArrayList = new ArrayList<>();
+        ArrayList<Genres> genresArrayList = Utils.newInstanceGenres();
 
         String selectQuery = "SELECT  * FROM " + TABLE_GENRES + " ORDER BY "+ KEY_GENRES_NAME +" ASC";
 
@@ -322,7 +330,7 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
     }
 
     public ArrayList<Performer> getAllPerformersByGenre(String[] str) {
-        ArrayList<Performer> itemList = new ArrayList<>();
+        ArrayList<Performer> itemList = Utils.newInstancePerformer();
 
         String selectQuery = "SELECT  * FROM " + TABLE_PERFORMERS + " WHERE "
                 + KEY_PERFORMER_GENRES + " LIKE " + "%cns";
@@ -342,23 +350,8 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
         Cursor cursor = db.rawQuery(finalQuery, null);
         if (cursor.moveToFirst()) {
             do {
-                Performer item = new Performer();
-
-                item.setmId(getIntCursor(cursor, KEY_ID));
-                item.setmName(getStringCursor(cursor, KEY_PERFORMER_NAME));
-
-                String genresString = getStringCursor(cursor, KEY_PERFORMER_GENRES);
-                List<String> genresList = Arrays.asList(genresString.split("\\s*,\\s*"));
-                item.setmGenres(genresList);
-
-                item.setmTracks(getIntCursor(cursor, KEY_COUNT_TRACKS));
-                item.setmAlbums(getIntCursor(cursor, KEY_COUNT_ALBUMS));
-                item.setmLink(getStringCursor(cursor, KEY_PERFORMER_LINK));
-                item.setmDescription(getStringCursor(cursor, KEY_DESCRIPTION));
-                item.setmCoverSmall(getStringCursor(cursor, KEY_COVER_SMALL));
-                item.setmCoverBig(getStringCursor(cursor, KEY_COVER_BIG));
+                Performer item = createNewPerformerByCursor(cursor);
                 itemList.add(item);
-
             } while (cursor.moveToNext());
         }
         cursor.close();
@@ -369,7 +362,7 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
 
     public ArrayList<Performer> getSearchResult(String[] wordsForSearch) {
 
-        ArrayList<Performer> itemList = new ArrayList<>();
+        ArrayList<Performer> itemList = Utils.newInstancePerformer();
 
         String selectQuery = "SELECT  * FROM " + TABLE_PERFORMERS + " WHERE "
                 + KEY_PERFORMER_NAME + " LIKE " + "(cast(" + "%cns" +" as text))";
@@ -398,22 +391,7 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
         assert cursor != null;
         if (cursor.moveToFirst()) {
             do {
-                Performer item = new Performer();
-
-                item.setmId(getIntCursor(cursor, KEY_ID));
-                item.setmName(getStringCursor(cursor, KEY_PERFORMER_NAME));
-
-                String genresString = getStringCursor(cursor, KEY_PERFORMER_GENRES);
-                List<String> genresList = Arrays.asList(genresString.split("\\s*,\\s*"));
-                item.setmGenres(genresList);
-
-                item.setmTracks(getIntCursor(cursor, KEY_COUNT_TRACKS));
-                item.setmAlbums(getIntCursor(cursor, KEY_COUNT_ALBUMS));
-                item.setmLink(getStringCursor(cursor, KEY_PERFORMER_LINK));
-                item.setmDescription(getStringCursor(cursor, KEY_DESCRIPTION));
-                item.setmCoverSmall(getStringCursor(cursor, KEY_COVER_SMALL));
-                item.setmCoverBig(getStringCursor(cursor, KEY_COVER_BIG));
-
+                Performer item = createNewPerformerByCursor(cursor);
                 itemList.add(item);
             } while (cursor.moveToNext());
         }
@@ -483,4 +461,56 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
         if (db != null && db.isOpen())
             db.close();
     }
+
+    private Performer createNewPerformerByCursor(Cursor cursor) {
+        return new PerformerBuilder()
+                .withId(getPerfIdFromCursor(cursor))
+                .withName(getPerfNameFromCursor(cursor))
+                .withGenres(getGenresListFromCursor(cursor))
+                .withTracks(getPerfCountTracksFromCursor(cursor))
+                .withAlbums(getPerfCountAlbumsFromCursor(cursor))
+                .withLink(getPerfLinkFromCursor(cursor))
+                .withDescription(getPerfDescriptionFromCursor(cursor))
+                .withCoverSmall(getPerfCoverSmallFromCursor(cursor))
+                .withCoverBig(getPerfCoverBigFromCursor(cursor))
+                .build();
+    }
+
+    private int getPerfIdFromCursor(Cursor cursor) {
+        return getIntCursor(cursor, KEY_ID);
+    }
+
+    private String getPerfNameFromCursor(Cursor cursor) {
+        return getStringCursor(cursor, KEY_PERFORMER_NAME);
+    }
+
+    private List<String> getGenresListFromCursor(Cursor cursor) {
+        String genresString = getStringCursor(cursor, KEY_PERFORMER_GENRES);
+        return Arrays.asList(genresString.split("\\s*,\\s*"));
+    }
+
+    private int getPerfCountTracksFromCursor(Cursor cursor) {
+        return getIntCursor(cursor, KEY_COUNT_TRACKS);
+    }
+
+    private int getPerfCountAlbumsFromCursor(Cursor cursor) {
+        return getIntCursor(cursor, KEY_COUNT_ALBUMS);
+    }
+
+    private String getPerfLinkFromCursor(Cursor cursor) {
+        return getStringCursor(cursor, KEY_PERFORMER_LINK);
+    }
+
+    private String getPerfDescriptionFromCursor(Cursor cursor) {
+        return getStringCursor(cursor, KEY_DESCRIPTION);
+    }
+
+    private String getPerfCoverSmallFromCursor(Cursor cursor) {
+        return getStringCursor(cursor, KEY_COVER_SMALL);
+    }
+
+    private String getPerfCoverBigFromCursor(Cursor cursor) {
+        return getStringCursor(cursor, KEY_COVER_BIG);
+    }
+
 }

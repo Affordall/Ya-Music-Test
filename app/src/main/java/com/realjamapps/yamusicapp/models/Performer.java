@@ -11,10 +11,8 @@ public class Performer  {
     private int mAlbums;
     private String mLink;
     private String mDescription;
-
     private String mCoverSmall;
     private String mCoverBig;
-
 
     /**
      * Create empty constructor

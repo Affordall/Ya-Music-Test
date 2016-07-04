@@ -43,7 +43,7 @@ import dmax.dialog.SpotsDialog;
 public class MainActivity extends AppCompatActivity implements DownloadResultReceiver.Receiver {
 
     private LinearLayoutManager mLayoutManager;
-    public static final String APP_SETTINGS = "settings";
+    int savedIntoViewIndex;
     private final int REQUEST_CODE_FILTERS = 1;
     private final int RESULT_GETALL = 77;
     private Menu menu;
@@ -71,8 +71,7 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        SharedPreferences sharedPreferences = getSharedPreferences(APP_SETTINGS, Context.MODE_PRIVATE);
-        int savedIntoViewIndex = sharedPreferences.getInt("SAVED_VIEW_INTRO_OR_NOT_INDEX", 0);
+        getAllSharedPreferences();
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -80,10 +79,7 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
 
         setSupportActionBar(toolbar);
 
-        if (savedIntoViewIndex == 0) {
-            Intent intentIntro = new Intent(this, FancyAppIntro.class);
-            startActivity(intentIntro);
-        }
+        showIntroDependingByIntroIndexVariable();
 
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this, null));
 
@@ -92,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        mPerformerList = new ArrayList<>();
+        mPerformerList = Utils.newInstancePerformer();
 
         mAdapter = new MainGridAdapter(getApplicationContext(), mPerformerList);
         mRecyclerView.setAdapter(mAdapter);
@@ -138,7 +134,6 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
     }
 
     private void checkInternetAndStartService() {
-
         if (Utils.isNetworkUnavailable()) {
             if (isDBempty()) {
                 handler.deleteAllDBs();
@@ -236,13 +231,21 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
     protected void onResume() {
         super.onResume();
         YaMusicApp.activityResumed();
+        //mReceiver = new DownloadResultReceiver(new Handler());
+        //mReceiver.setReceiver(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         YaMusicApp.activityPaused();
+        //mReceiver.setReceiver(null);
+    }
+
+    @Override
+    protected void onStop() {
         System.gc();
+        super.onStop();
     }
 
     @Override
@@ -261,8 +264,7 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
             outState.putParcelable("myState", mLayoutManager.onSaveInstanceState());
             outState.putInt("lastPosition",mLayoutManager.findFirstCompletelyVisibleItemPosition());
         } catch (NullPointerException e) {
-            e.printStackTrace();
-            return;
+            Utils.logError(e);
         }
     }
 
@@ -282,7 +284,6 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
         @Override
         protected ArrayList<Performer> doInBackground(String... params) {
             return handler.getAllPerformersByGenre(params);
-
         }
 
         @Override
@@ -323,4 +324,18 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
             Toast.makeText(MainActivity.this, getString(R.string.wrong_result), Toast.LENGTH_LONG).show();
         }
     }
+
+    private void getAllSharedPreferences() {
+        SharedPreferences sharedPreferences =
+                getSharedPreferences(Utils.APP_SETTINGS, Context.MODE_PRIVATE);
+        savedIntoViewIndex = sharedPreferences.getInt("SAVED_VIEW_INTRO_OR_NOT_INDEX", 0);
+    }
+
+    private void showIntroDependingByIntroIndexVariable() {
+        if (savedIntoViewIndex == 0) {
+            Intent intentIntro = new Intent(this, FancyAppIntro.class);
+            startActivity(intentIntro);
+        }
+    }
+
 }

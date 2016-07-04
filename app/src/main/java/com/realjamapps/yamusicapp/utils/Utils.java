@@ -10,15 +10,18 @@ import android.net.Uri;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 
 import com.realjamapps.yamusicapp.R;
 import com.realjamapps.yamusicapp.receivers.DownloadResultReceiver;
 import com.realjamapps.yamusicapp.services.DownloadServiceIntent;
 
+import java.util.ArrayList;
+
 public class Utils {
 
+    public static final String APP_SETTINGS = "settings";
     private static int deviceAPI = Build.VERSION.SDK_INT;
-
     private static Context mContext = YaMusicApp.getContext();
 
     public static boolean isNetworkUnavailable() {
@@ -56,7 +59,8 @@ public class Utils {
             }
 
         } catch (NullPointerException e) {
-            e.printStackTrace();
+            logError(e);
+            //e.printStackTrace();
         }
     }
 
@@ -81,6 +85,22 @@ public class Utils {
 
     public static boolean isMarshmallow() {
         return deviceAPI >= Build.VERSION_CODES.M;
+    }
+
+    public static boolean isKitkat() {
+        return deviceAPI >= Build.VERSION_CODES.KITKAT;
+    }
+
+    public static void logError(Exception e) {
+        Log.e("-YA-MUSIC-ERROR:"," " + e.getMessage());
+    }
+
+    public static synchronized <Genres>ArrayList<Genres> newInstanceGenres() {
+        return new ArrayList<>();
+    }
+
+    public static synchronized <Performer>ArrayList<Performer> newInstancePerformer() {
+        return new ArrayList<>();
     }
 
 
