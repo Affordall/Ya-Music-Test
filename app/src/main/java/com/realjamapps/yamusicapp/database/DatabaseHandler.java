@@ -194,6 +194,8 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
         SQLiteStatement stmt = db.compileStatement(sql);
         try {
             validateIncomingInstance(db, stmt, incomeObj);
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             db.endTransaction();
             stmt.close();
@@ -205,18 +207,20 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
     private void newApiSqlStatement(SQLiteDatabase db, String sql, Object incomeObj) {
         try (SQLiteStatement stmt = db.compileStatement(sql)) {
             validateIncomingInstance(db, stmt, incomeObj);
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             db.endTransaction();
             closeDB(db);
         }
     }
 
-    private void validateIncomingInstance(SQLiteDatabase db, SQLiteStatement stmt, Object incomeObj) {
+    private void validateIncomingInstance(SQLiteDatabase db, SQLiteStatement stmt, Object incomeObj) throws Exception {
         if (incomeObj instanceof Performer) {
             commonSqlStatementPerformer(db, stmt, (Performer)incomeObj);
         } else if (incomeObj instanceof Genres) {
             commonSqlStatementGenres(db, stmt, (Genres)incomeObj);
-        }
+        } else throw new Exception("Unknown incoming instance of class");
     }
 
     private void commonSqlStatementPerformer(SQLiteDatabase db, SQLiteStatement stmt, Performer perf) {

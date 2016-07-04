@@ -8,6 +8,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -51,17 +52,19 @@ public class Utils {
         try {
             if (toolbar != null) {
                 ((AppCompatActivity) context).setSupportActionBar(toolbar);
-                ((AppCompatActivity) context).getSupportActionBar().setHomeButtonEnabled(homeEnabled);
-                ((AppCompatActivity) context).getSupportActionBar().setDisplayHomeAsUpEnabled(homeAsUp);
-                ((AppCompatActivity) context).getSupportActionBar().setDisplayShowTitleEnabled(showTitleEnabled);
-                ((AppCompatActivity) context).getSupportActionBar().setTitle(title);
-                ((AppCompatActivity) context).getSupportActionBar().setElevation(7);
+                getToolBar(context).setHomeButtonEnabled(homeEnabled);
+                getToolBar(context).setDisplayHomeAsUpEnabled(homeAsUp);
+                getToolBar(context).setDisplayShowTitleEnabled(showTitleEnabled);
+                getToolBar(context).setTitle(title);
+                getToolBar(context).setElevation(7);
             }
-
         } catch (NullPointerException e) {
             logError(e);
-            //e.printStackTrace();
         }
+    }
+
+    private static ActionBar getToolBar(Context context) {
+        return ((AppCompatActivity) context).getSupportActionBar();
     }
 
     public static int getToolbarHeight(Context context) {
@@ -79,6 +82,10 @@ public class Utils {
         context.startService(intent);
     }
 
+    public static boolean isKitkat() {
+        return deviceAPI >= Build.VERSION_CODES.KITKAT;
+    }
+
     public static boolean isLollipop() {
         return deviceAPI >= Build.VERSION_CODES.LOLLIPOP;
     }
@@ -87,8 +94,8 @@ public class Utils {
         return deviceAPI >= Build.VERSION_CODES.M;
     }
 
-    public static boolean isKitkat() {
-        return deviceAPI >= Build.VERSION_CODES.KITKAT;
+    public static boolean isNougat() {
+        return deviceAPI >= Build.VERSION_CODES.N;
     }
 
     public static void logError(Exception e) {
