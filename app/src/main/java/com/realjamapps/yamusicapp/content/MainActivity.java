@@ -9,6 +9,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.util.Pair;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -23,6 +25,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.facebook.drawee.view.SimpleDraweeView;
 import com.realjamapps.yamusicapp.R;
 import com.realjamapps.yamusicapp.adapters.MainGridAdapter;
 import com.realjamapps.yamusicapp.database.DatabaseHandler;
@@ -43,7 +46,7 @@ import dmax.dialog.SpotsDialog;
 public class MainActivity extends AppCompatActivity implements DownloadResultReceiver.Receiver {
 
     private LinearLayoutManager mLayoutManager;
-    int savedIntoViewIndex;
+    private int savedIntoViewIndex;
     private final int REQUEST_CODE_FILTERS = 1;
     private final int RESULT_GETALL = 77;
     private Menu menu;
