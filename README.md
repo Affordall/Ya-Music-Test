@@ -11,11 +11,11 @@ A test application for [Yandex Mobile Development School 2016](https://academy.y
 * Searching artists
 
 ## Screenshots:
-<img src="/art/yamusic-main-screen.jpg?raw=true" width=360 height=640 alt="Main Screen">
-<img src="/art/yamusic-details-screen.jpg?raw=true" width=360 height=640 alt="Detail Screen">
+<img src="/art/yamusic-main-screen.png?raw=true" width=360 height=640 alt="Main Screen">
+<img src="/art/yamusic-details-screen.png?raw=true" width=360 height=640 alt="Detail Screen">
 
-<img src="/art/yamusic-search-screen.jpg?raw=true" width=360 height=640 alt="Search Screen">
-<img src="/art/yamusic-filter-screen.jpg?raw=true" width=360 height=640 alt="Genre filter Screen">
+<img src="/art/yamusic-search-screen.png?raw=true" width=360 height=640 alt="Search Screen">
+<img src="/art/yamusic-filter-screen.png?raw=true" width=360 height=640 alt="Genre filter Screen">
 
 ## APK
 Ready to use [apk](https://yadi.sk/d/lGWKupS6szTdW)
