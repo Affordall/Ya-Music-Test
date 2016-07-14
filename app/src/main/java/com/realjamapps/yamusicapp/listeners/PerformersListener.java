@@ -6,8 +6,6 @@ import java.util.ArrayList;
 
 public interface PerformersListener {
     void addPerformer(Performer perf);
-
     ArrayList<Performer> getAllPerformers();
-
     int getPerformersCount();
 }

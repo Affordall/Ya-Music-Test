@@ -12,12 +12,17 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.realjamapps.yamusicapp.R;
 import com.realjamapps.yamusicapp.receivers.DownloadResultReceiver;
 import com.realjamapps.yamusicapp.services.DownloadServiceIntent;
 
+import org.jetbrains.annotations.Contract;
+
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 public class Utils {
 
@@ -25,6 +30,10 @@ public class Utils {
     private static int deviceAPI = Build.VERSION.SDK_INT;
     private static Context mContext = YaMusicApp.getContext();
 
+    /**
+     * Method to check Internet available.
+     * @return boolean
+     * */
     public static boolean isNetworkUnavailable() {
         ConnectivityManager connectivityManager = (ConnectivityManager)mContext
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -33,6 +42,10 @@ public class Utils {
         return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
     }
 
+    /**
+     * Method that get app URL and launch Google Play to rate it.
+     * @return void
+     * */
     public static void launchMarket() {
         Uri uri = Uri.parse("market://details?id=" + mContext.getPackageName());
         Intent myAppLinkToMarket = new Intent(Intent.ACTION_VIEW, uri);
@@ -63,6 +76,11 @@ public class Utils {
         }
     }
 
+    /**
+     * Method to get Support Action Bar.
+     * @param context
+     * @return ActionBar
+     * */
     private static ActionBar getToolBar(Context context) {
         return ((AppCompatActivity) context).getSupportActionBar();
     }
@@ -82,32 +100,47 @@ public class Utils {
         context.startService(intent);
     }
 
+    @Contract(pure = true)
     public static boolean isKitkat() {
         return deviceAPI >= Build.VERSION_CODES.KITKAT;
     }
 
+    @Contract(pure = true)
     public static boolean isLollipop() {
         return deviceAPI >= Build.VERSION_CODES.LOLLIPOP;
     }
 
+    @Contract(pure = true)
     public static boolean isMarshmallow() {
         return deviceAPI >= Build.VERSION_CODES.M;
     }
 
+    @Contract(pure = true)
     public static boolean isNougat() {
         return deviceAPI >= Build.VERSION_CODES.N;
     }
 
     public static void logError(Exception e) {
-        Log.e("-YA-MUSIC-ERROR:"," " + e.getMessage());
+        String error = e.getMessage() + " " + e.getCause();
+        Log.e("-YA-MUSIC-ERROR:"," " + error);
+        //Toast.makeText(mContext, error, Toast.LENGTH_SHORT).show();
     }
 
+    @Contract(" -> !null")
     public static synchronized <Genres>ArrayList<Genres> newInstanceGenres() {
         return new ArrayList<>();
     }
 
+    @Contract(" -> !null")
     public static synchronized <Performer>ArrayList<Performer> newInstancePerformer() {
         return new ArrayList<>();
+    }
+
+    private void measureExecutionTime() {
+        long startTime = System.currentTimeMillis();
+        /* Insert Method here */
+        long endTime = System.currentTimeMillis();
+        System.out.println("That took " + (endTime - startTime) + " milliseconds");
     }
 
 

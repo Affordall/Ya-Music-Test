@@ -9,8 +9,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.util.Pair;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -25,11 +23,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.facebook.drawee.view.SimpleDraweeView;
 import com.realjamapps.yamusicapp.R;
 import com.realjamapps.yamusicapp.adapters.MainGridAdapter;
 import com.realjamapps.yamusicapp.database.DatabaseHandler;
 import com.realjamapps.yamusicapp.intro.FancyAppIntro;
+import com.realjamapps.yamusicapp.listeners.PerformersListener;
 import com.realjamapps.yamusicapp.models.Performer;
 import com.realjamapps.yamusicapp.receivers.DownloadResultReceiver;
 import com.realjamapps.yamusicapp.services.DownloadServiceIntent;
@@ -60,15 +58,23 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
     @Bind(R.id.rc_list) RecyclerView mRecyclerView;
     @Bind(R.id.swipeContainer) SwipeRefreshLayout mSwipeRefreshLayout;
 
-    @Nullable
-    MainGridAdapter.OnItemClickListener onItemClickListener = new MainGridAdapter.OnItemClickListener() {
-        @Override
-        public void onItemClick(View v, int position) {
+//    @Nullable
+//    MainGridAdapter.OnItemClickListener onItemClickListener = new MainGridAdapter.OnItemClickListener() {
+//        @Override
+//        public void onItemClick(View v, int position) {
+//
+//            Intent transitionIntent = new Intent(MainActivity.this, DetailsActivity.class);
+//            transitionIntent.putExtra(DetailsActivity.EXTRA_PARAM_ID, position);
+//            startActivity(transitionIntent);
+//        }
+//    };
 
-            Intent transitionIntent = new Intent(MainActivity.this, DetailsActivity.class);
-            transitionIntent.putExtra(DetailsActivity.EXTRA_PARAM_ID, position);
-            startActivity(transitionIntent);
-        }
+    @Nullable
+    MainGridAdapter.OnItemClickListener onItemClickListener = (v, position) -> {
+
+        Intent transitionIntent = new Intent(MainActivity.this, DetailsActivity.class);
+        transitionIntent.putExtra(DetailsActivity.EXTRA_PARAM_ID, position);
+        startActivity(transitionIntent);
     };
 
     @Override
@@ -99,9 +105,10 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
 
         handler = DatabaseHandler.getInstance(this);
 
-        /* Initialize Download Service */
-        mReceiver = new DownloadResultReceiver(new Handler());
-        mReceiver.setReceiver(this);
+        initializeDownloadService();
+
+
+
 
         if (isDBempty()) {
             getArtistAndRefreshAdapter();
@@ -109,13 +116,16 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
             checkInternetAndStartService();
         }
 
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        initializeSwipeRefreshLayout();
 
-            @Override
-            public void onRefresh() {
-                refreshList();
-            }
-        });
+    }
+
+    private boolean isDBempty() {
+        return handler.getPerformersCount() !=0;
+    }
+
+    private void initializeSwipeRefreshLayout() {
+        mSwipeRefreshLayout.setOnRefreshListener(this::refreshList);
 
         mSwipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_dark,
                 android.R.color.holo_green_dark,
@@ -123,8 +133,9 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
                 android.R.color.holo_red_dark);
     }
 
-    private boolean isDBempty() {
-        return handler.getPerformersCount() !=0;
+    private void initializeDownloadService() {
+        mReceiver = new DownloadResultReceiver(new Handler());
+        mReceiver.setReceiver(this);
     }
 
     void refreshList() {
@@ -140,9 +151,9 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
         if (Utils.isNetworkUnavailable()) {
             if (isDBempty()) {
                 handler.deleteAllDBs();
-                if (mAdapter != null) {
-                    mAdapter.clear();
-                }
+//                if (mAdapter != null) {
+//                    mAdapter.clear();
+//                }
             }
             Utils.createIntentStartService(this, mReceiver);
         } else {
@@ -163,6 +174,8 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
                  dialog = new SpotsDialog(MainActivity.this, R.style.CustomProgressDialogStyle);
                  dialog.show();
 
+                setRecyclerViewVisibility(false);
+
                 break;
             case DownloadServiceIntent.STATUS_FINISHED:
 
@@ -179,12 +192,18 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
                 if (dialog != null) {
                     dialog.dismiss();
                 }
+
+                setRecyclerViewVisibility(true);
+
                 Toast.makeText(MainActivity.this, getString(R.string.update_complete), Toast.LENGTH_LONG).show();
                 break;
             case DownloadServiceIntent.STATUS_ERROR:
                 if (dialog != null) {
                     dialog.dismiss();
                 }
+
+                setRecyclerViewVisibility(true);
+
                 String error = resultData.getString(Intent.EXTRA_TEXT);
                 Toast.makeText(this, error, Toast.LENGTH_LONG).show();
                 break;
@@ -227,6 +246,14 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
 
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void setRecyclerViewVisibility(boolean shouldVisible) {
+        if (shouldVisible) {
+            mRecyclerView.setVisibility(View.VISIBLE);
+        } else {
+            mRecyclerView.setVisibility(View.INVISIBLE);
         }
     }
 

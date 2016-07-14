@@ -42,7 +42,7 @@
 -keep interface android.support.v7.app.** { *; }
 -keep class com.google.android.** {*;}
 
-
+-dontwarn java.lang.invoke.*
 
 -dontwarn android.support.design.**
 -keep class android.support.design.** { *; }

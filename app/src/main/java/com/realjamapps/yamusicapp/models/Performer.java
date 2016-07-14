@@ -15,13 +15,13 @@ public class Performer  {
     private String mCoverBig;
 
     /**
-     * Create empty constructor
+     * Empty constructor
      * */
     public Performer() {
     }
 
     /**
-     * Create normal constructor
+     * Normal constructor for Builder
      * */
     public Performer(int _id, String _perfName, List _perfGenres, int _perfTracks,
                 int _perfAlbums, String _perfUrl, String _perfDescription, String _smallCover,
@@ -46,27 +46,11 @@ public class Performer  {
     }
 
     /**
-     * Setter for Performer ID
-     * @param mId int
-     * */
-    public void setmId(int mId) {
-        this.mId = mId;
-    }
-
-    /**
      * Getter for Performer Name
      * @return String mName
      * */
     public String getmName() {
         return mName;
-    }
-
-    /**
-     * Setter for Performer Name
-     * @param mName String
-     * */
-    public void setmName(String mName) {
-        this.mName = mName;
     }
 
     /**
@@ -78,27 +62,11 @@ public class Performer  {
     }
 
     /**
-     * Setter for Performer Genres
-     * @param mGenres List
-     * */
-    public void setmGenres(List<?> mGenres) {
-        this.mGenres = mGenres;
-    }
-
-    /**
      * Getter for count Performer Tracks
      * @return int mTracks
      * */
     public int getmTracks() {
         return mTracks;
-    }
-
-    /**
-     * Setter for count Performer Tracks
-     * @param mTracks int
-     * */
-    public void setmTracks(int mTracks) {
-        this.mTracks = mTracks;
     }
 
     /**
@@ -110,27 +78,11 @@ public class Performer  {
     }
 
     /**
-     * Setter for count Performer Albums
-     * @param mAlbums int
-     * */
-    public void setmAlbums(int mAlbums) {
-        this.mAlbums = mAlbums;
-    }
-
-    /**
      * Getter for link on Performer
      * @return int mAlbums
      * */
     public String getmLink() {
         return mLink;
-    }
-
-    /**
-     * Setter for link on Performer
-     * @param mLink String
-     * */
-    public void setmLink(String mLink) {
-        this.mLink = mLink;
     }
 
     /**
@@ -142,27 +94,11 @@ public class Performer  {
     }
 
     /**
-     * Setter for Performer Description
-     * @param mDescription String
-     * */
-    public void setmDescription(String mDescription) {
-        this.mDescription = mDescription;
-    }
-
-    /**
      * Getter for Performer Small Cover
      * @return String mCoverSmall
      * */
     public String getmCoverSmall() {
         return mCoverSmall;
-    }
-
-    /**
-     * Setter for Performer Small Cover
-     * @param mCoverSmall String
-     * */
-    public void setmCoverSmall(String mCoverSmall) {
-        this.mCoverSmall = mCoverSmall;
     }
 
     /**
@@ -173,11 +109,4 @@ public class Performer  {
         return mCoverBig;
     }
 
-    /**
-     * Setter for Performer Big Cover
-     * @param mCoverBig String
-     * */
-    public void setmCoverBig(String mCoverBig) {
-        this.mCoverBig = mCoverBig;
-    }
 }

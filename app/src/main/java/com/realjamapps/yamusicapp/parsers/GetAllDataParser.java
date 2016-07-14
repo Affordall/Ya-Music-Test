@@ -3,13 +3,14 @@ package com.realjamapps.yamusicapp.parsers;
 import android.content.Context;
 import android.widget.Toast;
 
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import com.realjamapps.yamusicapp.R;
 import com.realjamapps.yamusicapp.database.DatabaseHandler;
 import com.realjamapps.yamusicapp.models.Genres;
 import com.realjamapps.yamusicapp.models.Performer;
 import com.realjamapps.yamusicapp.models.PerformerBuilder;
 import com.squareup.okhttp.Cache;
-import com.squareup.okhttp.Interceptor;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -20,9 +21,6 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -46,15 +44,15 @@ public class GetAllDataParser {
 
             serverData = client.newCall(request).execute().body().string();
 
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-            throw new RuntimeException(e);
         }
 
         if (serverData != null) {
+            long startTime = System.currentTimeMillis();
             getJson(serverData);
+            long endTime = System.currentTimeMillis();
+            System.out.println("That took " + (endTime - startTime) + " milliseconds");
         } else {
             Toast.makeText(context, context.getString(R.string.oops_error), Toast.LENGTH_SHORT).show();
         }
@@ -71,24 +69,13 @@ public class GetAllDataParser {
         okHttpClient.setCache(cache);
 
         /** Dangerous interceptor that rewrites the server's cache-control header. */
-        okHttpClient.interceptors().add(new Interceptor() {
-            @Override public Response intercept(Chain chain) throws IOException {
-                Response originalResponse = chain.proceed(chain.request());
-                return originalResponse.newBuilder()
-                        .header("Cache-Control", "max-age=300")
-                        .build();
-            }
+        okHttpClient.interceptors().add(chain -> {
+            Response originalResponse = chain.proceed(chain.request());
+            return originalResponse.newBuilder()
+                    .header("Cache-Control", "max-age=300")
+                    .build();
         });
         return okHttpClient;
-    }
-
-    private void checkGenreExist(DatabaseHandler handler, String TableName, String ColumnName,
-                                String ColumnData) throws JSONException {
-        if (!handler.checkIfRecordExist(TableName, ColumnName, ColumnData)) {
-            if(ColumnData != null && !ColumnData.isEmpty()) {
-                handler.addGenres(new Genres(ColumnData));
-            }
-        }
     }
 
     private void getJson(String serverData) {
@@ -96,36 +83,41 @@ public class GetAllDataParser {
             JSONArray jsonArray = new JSONArray(serverData);
             for (int jsonArrayIndex = 0; jsonArrayIndex < jsonArray.length(); jsonArrayIndex++) {
 
-                JSONObject jsonObjectItem = jsonArray.getJSONObject(jsonArrayIndex);
+                try {
+                    JSONObject jsonObjectItem = jsonArray.getJSONObject(jsonArrayIndex);
 
-                String itemNameRAW = getPerfName(jsonObjectItem);
+                    String itemNameRAW = getPerfName(jsonObjectItem);
 
-                List<String> genresList = getPerfGenres(jsonObjectItem);
+                    //List<String> genresList = getPerfGenres(jsonObjectItem);
+                    List<String> genresList = getPerfGenresLambda(jsonObjectItem);
 
-                int perfId = universalGetIntByString(jsonObjectItem, "id");
-                int perfTracks = universalGetIntByString(jsonObjectItem, "tracks");
-                int perfAlbums = universalGetIntByString(jsonObjectItem, "albums");
+                    int perfId = universalGetIntByString(jsonObjectItem, "id");
+                    int perfTracks = universalGetIntByString(jsonObjectItem, "tracks");
+                    int perfAlbums = universalGetIntByString(jsonObjectItem, "albums");
 
-                String perfUrl = getPerfLink(jsonObjectItem);
+                    String perfUrl = getPerfLink(jsonObjectItem);
 
-                String finDescription = getPerfDescription(jsonObjectItem);
+                    String finDescription = getPerfDescription(jsonObjectItem);
 
-                String perfCoverSmall = getPerfCover(jsonObjectItem, "small");
-                String perfCoverBig = getPerfCover(jsonObjectItem, "big");
+                    String perfCoverSmall = getPerfCover(jsonObjectItem, "small");
+                    String perfCoverBig = getPerfCover(jsonObjectItem, "big");
 
-                Performer item = new PerformerBuilder()
-                        .withId(perfId)
-                        .withName(itemNameRAW)
-                        .withGenres(genresList)
-                        .withTracks(perfTracks)
-                        .withAlbums(perfAlbums)
-                        .withLink(perfUrl)
-                        .withDescription(finDescription)
-                        .withCoverSmall(perfCoverSmall)
-                        .withCoverBig(perfCoverBig)
-                        .build();
+                    Performer item = new PerformerBuilder()
+                            .withId(perfId)
+                            .withName(itemNameRAW)
+                            .withGenres(genresList)
+                            .withTracks(perfTracks)
+                            .withAlbums(perfAlbums)
+                            .withLink(perfUrl)
+                            .withDescription(finDescription)
+                            .withCoverSmall(perfCoverSmall)
+                            .withCoverBig(perfCoverBig)
+                            .build();
 
-                handler.addPerformer(item);
+                    handler.addPerformer(item);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -141,24 +133,58 @@ public class GetAllDataParser {
         return coversJO.getString(instr);
     }
 
-    private List<String> getPerfGenres(JSONObject jsonObjectItem) throws JSONException {
+    private List<String> getPerfGenresLambda(JSONObject jsonObjectItem) throws JSONException {
+
         JSONArray jsonArrayGenres = jsonObjectItem.getJSONArray("genres");
 
         String jsonFormattedString = jsonArrayGenres.toString().replaceAll("\"|\\[|\\]", "");
 
-        List<String> eachGenreStringList =
-                Arrays.asList(jsonFormattedString.split("\\s*,\\s*"));
+        List<String> finalList = Stream.of(jsonFormattedString.split("\\s*,\\s*"))
+                .collect(Collectors.toList());
 
-        List<String> genresList = new ArrayList<>();
+        Stream.of()
+                .forEach(this::safeCheck);
 
-        for (int j = 0; j < eachGenreStringList.size(); j++) {
-            Genres genre = new Genres();
-            String eachGenreNameString = eachGenreStringList.get(j);
-            genre.setName(eachGenreNameString);
-            checkGenreExist(handler, "genres", "genres_name", eachGenreNameString);
-            genresList.add(eachGenreNameString);
+
+//        Stream.of(finalList)
+//                .forEach(this::safeCheck);
+
+        return finalList;
+    }
+
+//    private List<String> getPerfGenres(JSONObject jsonObjectItem) throws JSONException {
+//        JSONArray jsonArrayGenres = jsonObjectItem.getJSONArray("genres");
+//
+//        String jsonFormattedString = jsonArrayGenres.toString().replaceAll("\"|\\[|\\]", "");
+//
+//        List<String> eachGenreStringList =
+//                Arrays.asList(jsonFormattedString.split("\\s*,\\s*"));
+//
+//        List<String> genresList = new ArrayList<>();
+//
+//        for (String eachGenreNameString : eachGenreStringList) {
+//            checkGenreExist(handler, "genres", "genres_name", eachGenreNameString);
+//            genresList.add(eachGenreNameString);
+//        }
+//
+//        return genresList;
+//    }
+
+    private void safeCheck(Object ColumnData) {
+        try {
+            checkGenreExist(handler, "genres", "genres_name", (String) ColumnData);
+        } catch (JSONException ex) {
+            throw new RuntimeException(ex);
         }
-        return genresList;
+    }
+
+    private void checkGenreExist(DatabaseHandler handler, String TableName, String ColumnName,
+                                 String ColumnData) throws JSONException {
+        if (!handler.checkIfRecordExist(TableName, ColumnName, ColumnData)) {
+            if(ColumnData != null && !ColumnData.isEmpty()) {
+                handler.addGenres(new Genres(ColumnData));
+            }
+        }
     }
 
     private String getPerfLink(JSONObject jsonObjectItem) throws JSONException {
@@ -177,5 +203,6 @@ public class GetAllDataParser {
     private int universalGetIntByString(JSONObject jsonObjectItem, String instr) throws JSONException {
         return Integer.parseInt(jsonObjectItem.getString(instr));
     }
+
 }
 

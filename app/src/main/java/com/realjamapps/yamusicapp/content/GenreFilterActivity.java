@@ -22,6 +22,7 @@ import com.realjamapps.yamusicapp.utils.DividerItemDecoration;
 import com.realjamapps.yamusicapp.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -65,16 +66,22 @@ public class GenreFilterActivity extends AppCompatActivity {
             startGenresFetcherTask();
         }
 
-        assert mFab != null;
         mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                // TODO: 06.07.16 Can be simplified
+
                 String data;
                 Intent filterIntent = new Intent();
 
                 ArrayList<Genres> genreFilters = mAdapter.getGenresList();
 
                 ArrayList<String> onlyGenresNameList = new ArrayList<>();
+
+//                for (Genres single : genreFilters) {
+//
+//                }
 
                 for (int i = 0; i < genreFilters.size(); i++) {
                     Genres singleGenre = genreFilters.get(i);
@@ -88,6 +95,14 @@ public class GenreFilterActivity extends AppCompatActivity {
                 finish();
             }
         });
+    }
+
+    private boolean isDBnotEmpty() {
+        return handler.getGenresCount() !=0;
+    }
+
+    private AsyncTask startGenresFetcherTask() {
+        return new SelectAllGenresTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     class SelectAllGenresTask extends AsyncTask<String,Void,ArrayList<Genres>> {
@@ -110,14 +125,6 @@ public class GenreFilterActivity extends AppCompatActivity {
             mAdapter.refresh(result);
             dialog.dismiss();
         }
-    }
-
-    private AsyncTask startGenresFetcherTask() {
-        return new SelectAllGenresTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-
-    private boolean isDBnotEmpty() {
-        return handler.getGenresCount() !=0;
     }
 
     private void setUpSupportActionBar() {

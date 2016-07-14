@@ -5,6 +5,8 @@ import java.util.List;
 /**
  * Created by affy on 21.06.16.
  * https://www.javacodegeeks.com/2013/06/builder-pattern-good-for-code-great-for-tests.html
+ *
+ * Builder class for Performer model.
  */
 public class PerformerBuilder {
 
@@ -65,6 +67,9 @@ public class PerformerBuilder {
         return this;
     }
 
+    /**
+    * Терминирующий метод, заставляющий монады (описывают, но не делают) (withID, with..) выполняться
+    **/
     public Performer build() {
         this.validate();
         return new Performer(mId, mName, mGenres, mTracks, mAlbums, mLink, mDescription, mCoverSmall, mCoverBig);

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDatabaseLockedException;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
@@ -16,9 +17,12 @@ import android.util.Log;
 import com.realjamapps.yamusicapp.listeners.GenresListener;
 import com.realjamapps.yamusicapp.listeners.PerformersListener;
 import com.realjamapps.yamusicapp.models.Genres;
+import com.realjamapps.yamusicapp.models.GenresBuilder;
 import com.realjamapps.yamusicapp.models.Performer;
 import com.realjamapps.yamusicapp.models.PerformerBuilder;
 import com.realjamapps.yamusicapp.utils.Utils;
+
+import org.jetbrains.annotations.Contract;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -113,9 +117,14 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
 
     public void deleteAllDBs(){
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_PERFORMERS, null, null);
-        db.delete(TABLE_GENRES, null, null);
-        db.close();
+        try {
+            db.delete(TABLE_PERFORMERS, null, null);
+            db.delete(TABLE_GENRES, null, null);
+        } catch (SQLiteDatabaseLockedException e) {
+            e.printStackTrace();
+        } finally {
+            closeDB(db);
+        }
     }
 
     public Boolean checkIfRecordExist(String TableName, String ColumnName, String ColumnData) {
@@ -134,15 +143,13 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
         String q = "Select * FROM "+ TableName + " WHERE " + ColumnName + "='" + ColumnData + "'";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(q, null);
-        if (cursor.moveToFirst()) {
+        try {
+            return cursor.moveToFirst();
+        } finally {
             cursor.close();
             closeDB(db);
-            return true;
-        } else {
-            cursor.close();
-            closeDB(db);
-            return false;
         }
+
     }
 
     /**
@@ -215,6 +222,7 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
         }
     }
 
+    @Contract("_, _, null -> fail")
     private void validateIncomingInstance(SQLiteDatabase db, SQLiteStatement stmt, Object incomeObj) throws Exception {
         if (incomeObj instanceof Performer) {
             commonSqlStatementPerformer(db, stmt, (Performer)incomeObj);
@@ -291,15 +299,19 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
-
-        if (cursor.moveToFirst()) {
-            do {
-                Performer item = createNewPerformerByCursor(cursor);
-                itemList.add(item);
-            } while (cursor.moveToNext());
+        try {
+            if (cursor.moveToFirst()) {
+                do {
+                    Performer item = createNewPerformerByCursor(cursor);
+                    itemList.add(item);
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        } catch (IllegalStateException e) {
+            Utils.logError(e);
+        } finally {
+            closeDB(db);
         }
-        closeDB(db);
-        cursor.close();
         return itemList;
     }
 
@@ -311,18 +323,34 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
-
+        try {
         if (cursor.moveToFirst()) {
             do {
-                Genres genres = new Genres();
-                genres.setId(getIntCursor(cursor, KEY_GENRES_ID));
-                genres.setName(getStringCursor(cursor, KEY_GENRES_NAME));
+                Genres genres = createNewGenreByCursor(cursor);
                 genresArrayList.add(genres);
             } while (cursor.moveToNext());
         }
-        cursor.close();
-        closeDB(db);
+        } catch (IllegalStateException e) {
+            Utils.logError(e);
+        } finally {
+            closeDB(db);
+        }
         return genresArrayList;
+    }
+
+    private Genres createNewGenreByCursor(Cursor cursor) {
+        return new GenresBuilder()
+                .withId(getGenreIdFromCursor(cursor))
+                .withName(getGenreNameFromCursor(cursor))
+                .build();
+    }
+
+    private int getGenreIdFromCursor(Cursor cursor) {
+        return getIntCursor(cursor, KEY_GENRES_ID);
+    }
+
+    private String getGenreNameFromCursor(Cursor cursor) {
+        return getStringCursor(cursor, KEY_GENRES_NAME);
     }
 
     private String getStringCursor(Cursor cursor, String columnIndex) {
@@ -352,14 +380,18 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(finalQuery, null);
+        try {
         if (cursor.moveToFirst()) {
             do {
                 Performer item = createNewPerformerByCursor(cursor);
                 itemList.add(item);
             } while (cursor.moveToNext());
         }
-        cursor.close();
-        closeDB(db);
+        } catch (IllegalStateException e) {
+            Utils.logError(e);
+        } finally {
+            closeDB(db);
+        }
         return itemList;
     }
 
@@ -386,21 +418,25 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
         String finalQuery = null;
         try {
             finalQuery = selectQuery.replaceAll("%cns", cns.toString());
-        } catch (NullPointerException | ArrayIndexOutOfBoundsException e){
+        } catch (NullPointerException | ArrayIndexOutOfBoundsException e) {
             e.printStackTrace();
         }
 
         assert finalQuery != null;
         Cursor cursor = db.rawQuery(finalQuery, null);
         assert cursor != null;
+        try {
         if (cursor.moveToFirst()) {
             do {
                 Performer item = createNewPerformerByCursor(cursor);
                 itemList.add(item);
             } while (cursor.moveToNext());
         }
-        cursor.close();
-        closeDB(db);
+        } catch (IllegalStateException e) {
+            Utils.logError(e);
+        } finally {
+            closeDB(db);
+        }
         return itemList;
     }
 
@@ -439,7 +475,7 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
             closeDB(db);
             return num;
         } catch (Exception e) {
-            Log.e("error", e + "");
+            e.printStackTrace();
         }
         return 0;
     }
@@ -456,7 +492,7 @@ public class DatabaseHandler extends SQLiteOpenHelper implements PerformersListe
             closeDB(db);
             return num;
         } catch (Exception e) {
-            Log.e("error", e + "");
+            e.printStackTrace();
         }
         return 0;
     }
