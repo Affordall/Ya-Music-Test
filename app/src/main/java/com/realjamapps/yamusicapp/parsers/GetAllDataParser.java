@@ -1,40 +1,53 @@
 package com.realjamapps.yamusicapp.parsers;
 
-import android.content.Context;
-import android.widget.Toast;
+import android.util.Log;
 
-import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
-import com.realjamapps.yamusicapp.R;
-import com.realjamapps.yamusicapp.database.DatabaseHandler;
+import com.realjamapps.yamusicapp.app.YaMusicApp;
+import com.realjamapps.yamusicapp.events.UpdateEvent;
 import com.realjamapps.yamusicapp.models.Genres;
 import com.realjamapps.yamusicapp.models.Performer;
-import com.realjamapps.yamusicapp.models.PerformerBuilder;
-import com.squareup.okhttp.Cache;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
+import com.realjamapps.yamusicapp.repository.impl.sql.GenresSqlRepository;
+import com.realjamapps.yamusicapp.repository.impl.sql.PerformersSqlRepository;
+import com.realjamapps.yamusicapp.specifications.ISpecification;
 
+import org.greenrobot.eventbus.EventBus;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-public class GetAllDataParser {
-    private final String SOURCE_URL = "http://cache-spb03.cdn.yandex.net/download.cdn.yandex.net/mobilization-2016/artists.json";
-    private DatabaseHandler handler;
+import javax.inject.Inject;
 
-    private static final int MAX_CACHE_SIZE = 10 * 1024 * 1024;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 
-    public void getDataPlease(final Context context) {
-        handler = DatabaseHandler.getInstance(context);
+public class GetAllDataParser implements IParser {
 
-        OkHttpClient client = createCustomOkHttpClient(context);
+    private static final String SOURCE_URL = "http://cache-spb03.cdn.yandex.net/download.cdn.yandex.net/mobilization-2016/artists.json";
+    private static volatile GetAllDataParser sInstance;
 
+    @Inject PerformersJsonToModelConverter performerConverter;
+    @Inject GenresJsonToModelConverter genresConverter;
+    @Inject PerformersSqlRepository performersSqlRepository;
+    @Inject GenresSqlRepository genresSqlRepository;
+    @Inject OkHttpClient client;
+
+    public static synchronized GetAllDataParser getInstance() {
+        if (sInstance == null) {
+            sInstance = new GetAllDataParser();
+        }
+        return sInstance;
+    }
+
+    private GetAllDataParser() {
+        YaMusicApp.get(YaMusicApp.getContext()).getAppComponent().inject(this);
+    }
+
+    private void runParser(ISpecification specification) {
         String serverData = null;
         try {
             Request request = new Request.Builder()
@@ -43,78 +56,42 @@ public class GetAllDataParser {
                     .build();
 
             serverData = client.newCall(request).execute().body().string();
-
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         if (serverData != null) {
             long startTime = System.currentTimeMillis();
-            getJson(serverData);
+            getJson(serverData, specification);
             long endTime = System.currentTimeMillis();
             System.out.println("That took " + (endTime - startTime) + " milliseconds");
         } else {
-            Toast.makeText(context, context.getString(R.string.oops_error), Toast.LENGTH_SHORT).show();
+            //Toast.makeText(context, context.getString(R.string.oops_error), Toast.LENGTH_SHORT).show();
         }
     }
 
-    private static OkHttpClient createCustomOkHttpClient(Context context) {
-        OkHttpClient okHttpClient = new OkHttpClient();
-        okHttpClient.setConnectTimeout(10, TimeUnit.SECONDS);
-        okHttpClient.setReadTimeout(10, TimeUnit.SECONDS);
-        okHttpClient.setWriteTimeout(10, TimeUnit.SECONDS);
-        // Install an HTTP cache in the application cache directory.
-        File cacheDir = new File(context.getCacheDir(), "responses");
-        Cache cache = new Cache(cacheDir, MAX_CACHE_SIZE);
-        okHttpClient.setCache(cache);
-
-        /** Dangerous interceptor that rewrites the server's cache-control header. */
-        okHttpClient.interceptors().add(chain -> {
-            Response originalResponse = chain.proceed(chain.request());
-            return originalResponse.newBuilder()
-                    .header("Cache-Control", "max-age=300")
-                    .build();
-        });
-        return okHttpClient;
-    }
-
-    private void getJson(String serverData) {
+    private void getJson(String serverData, ISpecification specification) {
+        Log.e("-GetAllDataParser-", "-Started-");
         try {
             JSONArray jsonArray = new JSONArray(serverData);
             for (int jsonArrayIndex = 0; jsonArrayIndex < jsonArray.length(); jsonArrayIndex++) {
-
                 try {
                     JSONObject jsonObjectItem = jsonArray.getJSONObject(jsonArrayIndex);
 
-                    String itemNameRAW = getPerfName(jsonObjectItem);
+                    Performer performer = new Performer();
+                    performer.setmId(performerConverter.getPerformerId(jsonObjectItem));
+                    performer.setmName(performerConverter.getPerformerName(jsonObjectItem));
+                    performer.setmGenres(performerConverter.getPerformerGenresList(jsonObjectItem));
+                    performer.setmTracks(performerConverter.getPerformerTracksCount(jsonObjectItem));
+                    performer.setmAlbums(performerConverter.getPerformerAlbumsCount(jsonObjectItem));
+                    performer.setmLink(performerConverter.getPerformerUrl(jsonObjectItem));
+                    performer.setmDescription(performerConverter.getPerformerDescription(jsonObjectItem));
+                    performer.setmCoverSmall(performerConverter.getPerformerCoverSmall(jsonObjectItem));
+                    performer.setmCoverBig(performerConverter.getPerformerCoverBig(jsonObjectItem));
 
-                    //List<String> genresList = getPerfGenres(jsonObjectItem);
-                    List<String> genresList = getPerfGenresLambda(jsonObjectItem);
+                    performersSqlRepository.add(performer);
 
-                    int perfId = universalGetIntByString(jsonObjectItem, "id");
-                    int perfTracks = universalGetIntByString(jsonObjectItem, "tracks");
-                    int perfAlbums = universalGetIntByString(jsonObjectItem, "albums");
+                    addGenreToRepository(jsonObjectItem);
 
-                    String perfUrl = getPerfLink(jsonObjectItem);
-
-                    String finDescription = getPerfDescription(jsonObjectItem);
-
-                    String perfCoverSmall = getPerfCover(jsonObjectItem, "small");
-                    String perfCoverBig = getPerfCover(jsonObjectItem, "big");
-
-                    Performer item = new PerformerBuilder()
-                            .withId(perfId)
-                            .withName(itemNameRAW)
-                            .withGenres(genresList)
-                            .withTracks(perfTracks)
-                            .withAlbums(perfAlbums)
-                            .withLink(perfUrl)
-                            .withDescription(finDescription)
-                            .withCoverSmall(perfCoverSmall)
-                            .withCoverBig(perfCoverBig)
-                            .build();
-
-                    handler.addPerformer(item);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -122,87 +99,25 @@ public class GetAllDataParser {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        Log.e("-GetAllDataParser-", "-Done-");
+        EventBus.getDefault().post(new UpdateEvent((ArrayList<Performer>) performersSqlRepository.query(specification)));
     }
 
-    private String getPerfName(JSONObject jsonObjectItem) throws JSONException {
-        return jsonObjectItem.getString("name");
-    }
-
-    private String getPerfCover(JSONObject jsonObjectItem, String instr) throws JSONException {
-        JSONObject coversJO = jsonObjectItem.getJSONObject("cover");
-        return coversJO.getString(instr);
-    }
-
-    private List<String> getPerfGenresLambda(JSONObject jsonObjectItem) throws JSONException {
-
-        JSONArray jsonArrayGenres = jsonObjectItem.getJSONArray("genres");
-
-        String jsonFormattedString = jsonArrayGenres.toString().replaceAll("\"|\\[|\\]", "");
-
-        List<String> finalList = Stream.of(jsonFormattedString.split("\\s*,\\s*"))
-                .collect(Collectors.toList());
-
+    private void addGenreToRepository(JSONObject jsonObjectItem) throws JSONException {
+        List<String> genresList = genresConverter.getGenresList(jsonObjectItem);
         Stream.of()
-                .forEach(this::safeCheck);
-
-
-//        Stream.of(finalList)
-//                .forEach(this::safeCheck);
-
-        return finalList;
+                .forEach(item -> safeCheck(item, genresSqlRepository));
     }
 
-//    private List<String> getPerfGenres(JSONObject jsonObjectItem) throws JSONException {
-//        JSONArray jsonArrayGenres = jsonObjectItem.getJSONArray("genres");
-//
-//        String jsonFormattedString = jsonArrayGenres.toString().replaceAll("\"|\\[|\\]", "");
-//
-//        List<String> eachGenreStringList =
-//                Arrays.asList(jsonFormattedString.split("\\s*,\\s*"));
-//
-//        List<String> genresList = new ArrayList<>();
-//
-//        for (String eachGenreNameString : eachGenreStringList) {
-//            checkGenreExist(handler, "genres", "genres_name", eachGenreNameString);
-//            genresList.add(eachGenreNameString);
-//        }
-//
-//        return genresList;
-//    }
-
-    private void safeCheck(Object ColumnData) {
-        try {
-            checkGenreExist(handler, "genres", "genres_name", (String) ColumnData);
-        } catch (JSONException ex) {
-            throw new RuntimeException(ex);
-        }
+    private void safeCheck(Object ColumnData, GenresSqlRepository repository) {
+        Genres genres = new Genres();
+        genres.setName((String)ColumnData);
+        repository.add(genres);
     }
 
-    private void checkGenreExist(DatabaseHandler handler, String TableName, String ColumnName,
-                                 String ColumnData) throws JSONException {
-        if (!handler.checkIfRecordExist(TableName, ColumnName, ColumnData)) {
-            if(ColumnData != null && !ColumnData.isEmpty()) {
-                handler.addGenres(new Genres(ColumnData));
-            }
-        }
+    @Override
+    public void getData(ISpecification specification) {
+        runParser(specification);
     }
-
-    private String getPerfLink(JSONObject jsonObjectItem) throws JSONException {
-        String perfUrl;
-        if (jsonObjectItem.has("link")) {
-                perfUrl = jsonObjectItem.getString("link");
-        } else perfUrl = null;
-        return perfUrl;
-    }
-
-    private String getPerfDescription(JSONObject jsonObjectItem) throws JSONException {
-        String rawDescription  = jsonObjectItem.getString("description");
-        return rawDescription.substring(0,1).toUpperCase() + rawDescription.substring(1);
-    }
-
-    private int universalGetIntByString(JSONObject jsonObjectItem, String instr) throws JSONException {
-        return Integer.parseInt(jsonObjectItem.getString(instr));
-    }
-
 }
 

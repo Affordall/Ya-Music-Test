@@ -9,8 +9,9 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
-        android:name=".utils.YaMusicApp"
+        android:name=".app.YaMusicApp"
         android:allowBackup="true"
+        android:fullBackupContent="true"
         android:hardwareAccelerated="true"
         android:largeHeap="true"
         android:icon="@mipmap/ic_launcher"

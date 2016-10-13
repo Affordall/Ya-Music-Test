@@ -2,11 +2,16 @@ package com.realjamapps.yamusicapp.models;
 
 import java.util.List;
 
-public class Performer  {
+import io.realm.RealmList;
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
+public class Performer {// extends RealmObject {
+
+    //@PrimaryKey
     private int mId;
     private String mName;
-    private List<?> mGenres;
+    private List<String> mGenres;
     private int mTracks;
     private int mAlbums;
     private String mLink;
@@ -23,7 +28,7 @@ public class Performer  {
     /**
      * Normal constructor for Builder
      * */
-    public Performer(int _id, String _perfName, List _perfGenres, int _perfTracks,
+    public Performer(int _id, String _perfName, List<String> _perfGenres, int _perfTracks,
                 int _perfAlbums, String _perfUrl, String _perfDescription, String _smallCover,
                 String _bigCover) {
         this.mId = _id;
@@ -109,4 +114,39 @@ public class Performer  {
         return mCoverBig;
     }
 
+    public void setmId(int mId) {
+        this.mId = mId;
+    }
+
+    public void setmName(String mName) {
+        this.mName = mName;
+    }
+
+    public void setmGenres(List<String> mGenres) {
+        this.mGenres = mGenres;
+    }
+
+    public void setmTracks(int mTracks) {
+        this.mTracks = mTracks;
+    }
+
+    public void setmAlbums(int mAlbums) {
+        this.mAlbums = mAlbums;
+    }
+
+    public void setmLink(String mLink) {
+        this.mLink = mLink;
+    }
+
+    public void setmDescription(String mDescription) {
+        this.mDescription = mDescription;
+    }
+
+    public void setmCoverSmall(String mCoverSmall) {
+        this.mCoverSmall = mCoverSmall;
+    }
+
+    public void setmCoverBig(String mCoverBig) {
+        this.mCoverBig = mCoverBig;
+    }
 }

@@ -18,7 +18,7 @@ import android.widget.Toast;
 
 import com.realjamapps.yamusicapp.R;
 import com.realjamapps.yamusicapp.adapters.MainGridAdapter;
-import com.realjamapps.yamusicapp.database.DatabaseHandler;
+import com.realjamapps.yamusicapp.database.sql.DatabaseHandler;
 import com.realjamapps.yamusicapp.models.Performer;
 import com.realjamapps.yamusicapp.utils.Utils;
 
@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import dmax.dialog.SpotsDialog;
 
@@ -39,20 +39,20 @@ public class SearchResultsActivity extends AppCompatActivity {
     private DatabaseHandler handler;
     private ArrayList<Performer> mSearchPerformerList;
 
-    @Bind(R.id.search_result_list) RecyclerView mRecyclerView;
-    @Bind(R.id.toolbar_search) Toolbar mToolbar;
+    @BindView(R.id.search_result_list) RecyclerView mRecyclerView;
+    @BindView(R.id.toolbar_search) Toolbar mToolbar;
 
-    @Nullable
-    MainGridAdapter.OnItemClickListener onItemClickListener = new MainGridAdapter.OnItemClickListener() {
-        //@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-        @Override
-        public void onItemClick(View v, int position) {
-
-            Intent transitionIntent = new Intent(SearchResultsActivity.this, DetailsActivity.class);
-            transitionIntent.putExtra(DetailsActivity.EXTRA_PARAM_ID, position);
-            startActivity(transitionIntent);
-        }
-    };
+//    @Nullable
+//    MainGridAdapter.OnItemClickListener onItemClickListener = new MainGridAdapter.OnItemClickListener() {
+//        //@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+//        @Override
+//        public void onItemClick(View v, int position) {
+//
+//            Intent transitionIntent = new Intent(SearchResultsActivity.this, DetailsActivity.class);
+//            transitionIntent.putExtra(DetailsActivity.EXTRA_PARAM_ID, position);
+//            startActivity(transitionIntent);
+//        }
+//    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,10 +71,10 @@ public class SearchResultsActivity extends AppCompatActivity {
 
         mSearchPerformerList = new ArrayList<>();
 
-        mAdapter = new MainGridAdapter(getApplicationContext(), mSearchPerformerList);
+        //mAdapter = new MainGridAdapter(getApplicationContext(), mSearchPerformerList);
 
         mRecyclerView.setAdapter(mAdapter);
-        mAdapter.setOnItemClickListener(onItemClickListener);
+        //mAdapter.setOnItemClickListener(onItemClickListener);
 
         handler = DatabaseHandler.getInstance(this);
 
@@ -132,7 +132,9 @@ public class SearchResultsActivity extends AppCompatActivity {
 
         @Override
         protected ArrayList<Performer> doInBackground(String... params) {
-            return handler.getSearchResult(params);
+            return null;
+            // TODO: 04.10.16 fix
+            //return handler.getSearchResult(params);
         }
 
         @Override

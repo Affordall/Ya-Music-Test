@@ -12,17 +12,15 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.realjamapps.yamusicapp.R;
+import com.realjamapps.yamusicapp.app.YaMusicApp;
 import com.realjamapps.yamusicapp.receivers.DownloadResultReceiver;
 import com.realjamapps.yamusicapp.services.DownloadServiceIntent;
 
 import org.jetbrains.annotations.Contract;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.stream.Stream;
 
 public class Utils {
 

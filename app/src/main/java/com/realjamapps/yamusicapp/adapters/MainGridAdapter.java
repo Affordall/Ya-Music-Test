@@ -5,32 +5,45 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.AdapterView;
 
-import com.facebook.drawee.view.SimpleDraweeView;
 import com.realjamapps.yamusicapp.R;
 import com.realjamapps.yamusicapp.models.Performer;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
-
-public class MainGridAdapter extends RecyclerView.Adapter<MainGridAdapter.ViewHolder> {
+public class MainGridAdapter extends RecyclerView.Adapter<MainViewHolder> implements RecyclerView.OnItemTouchListener {
 
     private ArrayList<Performer> mItems;
-    OnItemClickListener mItemClickListener;
+    private final OnItemClickListener mListener;
+    private GestureDetector mGestureDetector;
     private Context mContext;
 
-    public MainGridAdapter(Context context, ArrayList<Performer> listData) {
+    public interface OnItemClickListener {
+        void onItemClick(View view, int position);
+    }
+
+    public MainGridAdapter(Context context, ArrayList<Performer> listData, OnItemClickListener listener) {
         mItems = new ArrayList<>();
         this.mContext = context;
         this.mItems = listData;
+        this.mListener = listener;
+        mGestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onSingleTapUp(MotionEvent e) {
+                return true;
+            }
+        });
+    }
+
+    public Performer getArticle(int i) {
+        return mItems.get(i);
     }
 
     public void refresh(ArrayList<Performer> listData) {
@@ -44,13 +57,13 @@ public class MainGridAdapter extends RecyclerView.Adapter<MainGridAdapter.ViewHo
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public MainViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.grid_item, parent, false);
-        return new ViewHolder(view);
+        return new MainViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
+    public void onBindViewHolder(final MainViewHolder holder, int position) {
 
         final Performer performer = mItems.get(position);
 
@@ -58,13 +71,13 @@ public class MainGridAdapter extends RecyclerView.Adapter<MainGridAdapter.ViewHo
 
         holder.draweeView.setImageURI(uri);
 
-        holder.tv_performer_name.setText(performer.getmName());
-        holder.tv_performer_name.setTypeface(null, Typeface.BOLD);
+        holder.tvPerformerName.setText(performer.getmName());
+        holder.tvPerformerName.setTypeface(null, Typeface.BOLD);
 
         List genres = performer.getmGenres();
 
         String genresString = TextUtils.join(", ", genres);
-        holder.tv_performer_genres.setText(genresString);
+        holder.tvPerformerGenres.setText(genresString);
 
         int albumsCount = performer.getmAlbums();
         int tracksCount = performer.getmTracks();
@@ -76,7 +89,7 @@ public class MainGridAdapter extends RecyclerView.Adapter<MainGridAdapter.ViewHo
                 + String.valueOf(tracksCount) + " "
                 + quantityTracks);
 
-        holder.tv_performer_tracks_and_albums.setText(tracksAlbumsString);
+        holder.tvPerformerTracksAlbums.setText(tracksAlbumsString);
     }
 
     @Override
@@ -84,34 +97,30 @@ public class MainGridAdapter extends RecyclerView.Adapter<MainGridAdapter.ViewHo
         return mItems.size();
     }
 
-    public void setOnItemClickListener(final OnItemClickListener mItemClickListener) {
-        this.mItemClickListener = mItemClickListener;
-    }
-
-    public interface OnItemClickListener {
-        void onItemClick(View view, int position);
-    }
-
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-
-        @Bind(R.id.placeMainHolder) RelativeLayout placeMainHolder;
-        @Bind(R.id.tv_performer_name) TextView tv_performer_name;
-        @Bind(R.id.tv_performer_genres) TextView tv_performer_genres;
-        @Bind(R.id.tv_performer_tracks_and_albums) TextView  tv_performer_tracks_and_albums;
-        @Bind(R.id.iv_image_url) SimpleDraweeView draweeView;
-
-        public ViewHolder(View itemView) {
-            super(itemView);
-            ButterKnife.bind(this, itemView);
-            placeMainHolder.setOnClickListener(this);
+    @Override
+    public boolean onInterceptTouchEvent(RecyclerView view, MotionEvent e) {
+        View childView = view.findChildViewUnder(e.getX(), e.getY());
+        if (childView != null && mListener != null && mGestureDetector.onTouchEvent(e)) {
+            mListener.onItemClick(childView, view.getChildAdapterPosition(childView));
         }
-
-        @Override
-        public void onClick(View v) {
-            if (mItemClickListener != null) {
-                Performer item = mItems.get(getAdapterPosition());
-                mItemClickListener.onItemClick(itemView, item.getmId());
-            }
-        }
+        return false;
     }
+
+    @Override
+    public void onTouchEvent(RecyclerView rv, MotionEvent e) {
+
+    }
+
+    @Override
+    public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+
+    }
+
+//    public void setOnItemClickListener(final OnItemClickListener mItemClickListener) {
+//        this.mItemClickListener = mItemClickListener;
+//    }
+//
+//    public interface OnItemClickListener {
+//        void onItemClick(View view, int position);
+//    }
 }

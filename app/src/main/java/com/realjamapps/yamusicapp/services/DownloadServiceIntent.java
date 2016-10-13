@@ -5,9 +5,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 
-import com.realjamapps.yamusicapp.database.DatabaseHandler;
+import com.realjamapps.yamusicapp.app.YaMusicApp;
+import com.realjamapps.yamusicapp.database.sql.DatabaseHandler;
 import com.realjamapps.yamusicapp.parsers.GetAllDataParser;
+import com.realjamapps.yamusicapp.specifications.impl.sql.SqlAllPerformersSortedByNameSpecification;
 import com.realjamapps.yamusicapp.utils.Utils;
+
+import javax.inject.Inject;
 
 
 public class DownloadServiceIntent extends IntentService {
@@ -16,7 +20,7 @@ public class DownloadServiceIntent extends IntentService {
     public static final int STATUS_FINISHED = 1;
     public static final int STATUS_ERROR = 2;
 
-    DatabaseHandler handler;
+    @Inject GetAllDataParser parser;
 
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
@@ -33,10 +37,9 @@ public class DownloadServiceIntent extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        YaMusicApp.get(YaMusicApp.getContext()).getAppComponent().inject(this);
 
         final ResultReceiver receiver = intent.getParcelableExtra("receiver");
-
-        handler = DatabaseHandler.getInstance(this);
 
         Bundle bundle = new Bundle();
 
@@ -45,11 +48,13 @@ public class DownloadServiceIntent extends IntentService {
             receiver.send(STATUS_RUNNING, Bundle.EMPTY);
 
             try {
-                new GetAllDataParser().getDataPlease(getApplicationContext());
+                parser.getData(new SqlAllPerformersSortedByNameSpecification());
+                //new GetAllDataParser().getDataPlease(getApplicationContext());
+
                 /* Sending result back to activity */
-                if (!handler.isDBlocked()) {
+//                if (!handler.isDBlocked()) {
                     receiver.send(STATUS_FINISHED, bundle);
-                }
+//                }
             } catch (Exception e) {
                 /* Sending error message back to activity */
                 bundle.putString(Intent.EXTRA_TEXT, e.toString());

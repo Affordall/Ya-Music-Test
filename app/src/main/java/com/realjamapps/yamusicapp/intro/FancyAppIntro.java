@@ -10,7 +10,7 @@ import android.widget.Toast;
 import com.github.paolorotolo.appintro.AppIntro2;
 import com.github.paolorotolo.appintro.AppIntroFragment;
 import com.realjamapps.yamusicapp.R;
-import com.realjamapps.yamusicapp.utils.YaMusicApp;
+import com.realjamapps.yamusicapp.app.YaMusicApp;
 
 
 public class FancyAppIntro extends AppIntro2 {

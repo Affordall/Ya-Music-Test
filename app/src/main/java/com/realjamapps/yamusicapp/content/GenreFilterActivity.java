@@ -16,15 +16,14 @@ import android.view.View;
 
 import com.realjamapps.yamusicapp.R;
 import com.realjamapps.yamusicapp.adapters.GenresListViewAdapter;
-import com.realjamapps.yamusicapp.database.DatabaseHandler;
+import com.realjamapps.yamusicapp.database.sql.DatabaseHandler;
 import com.realjamapps.yamusicapp.models.Genres;
 import com.realjamapps.yamusicapp.utils.DividerItemDecoration;
 import com.realjamapps.yamusicapp.utils.Utils;
 
 import java.util.ArrayList;
-import java.util.List;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import dmax.dialog.SpotsDialog;
 
@@ -37,9 +36,9 @@ public class GenreFilterActivity extends AppCompatActivity {
     private DatabaseHandler handler;
     private final int RESULT_GETALL = 77;
 
-    @Bind(R.id.toolbar) Toolbar toolbar;
-    @Bind(R.id.rv_genres_filter) RecyclerView mRecyclerView;
-    @Bind(R.id.fabFilters) FloatingActionButton mFab;
+    @BindView(R.id.toolbar) Toolbar toolbar;
+    @BindView(R.id.rv_genres_filter) RecyclerView mRecyclerView;
+    @BindView(R.id.fabFilters) FloatingActionButton mFab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,34 +65,31 @@ public class GenreFilterActivity extends AppCompatActivity {
             startGenresFetcherTask();
         }
 
-        mFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        mFab.setOnClickListener(view -> {
 
-                // TODO: 06.07.16 Can be simplified
+            // TODO: 06.07.16 Can be simplified
 
-                String data;
-                Intent filterIntent = new Intent();
+            String data;
+            Intent filterIntent = new Intent();
 
-                ArrayList<Genres> genreFilters = mAdapter.getGenresList();
+            ArrayList<Genres> genreFilters = mAdapter.getGenresList();
 
-                ArrayList<String> onlyGenresNameList = new ArrayList<>();
+            ArrayList<String> onlyGenresNameList = new ArrayList<>();
 
 //                for (Genres single : genreFilters) {
 //
 //                }
 
-                for (int i = 0; i < genreFilters.size(); i++) {
-                    Genres singleGenre = genreFilters.get(i);
-                    if (singleGenre.isSelected()) {
-                        data = singleGenre.getName();
-                        onlyGenresNameList.add(data);
-                    }
+            for (int i = 0; i < genreFilters.size(); i++) {
+                Genres singleGenre = genreFilters.get(i);
+                if (singleGenre.isSelected()) {
+                    data = singleGenre.getName();
+                    onlyGenresNameList.add(data);
                 }
-                filterIntent.putStringArrayListExtra("filter", onlyGenresNameList);
-                setResult(RESULT_OK, filterIntent);
-                finish();
             }
+            filterIntent.putStringArrayListExtra("filter", onlyGenresNameList);
+            setResult(RESULT_OK, filterIntent);
+            finish();
         });
     }
 
@@ -116,7 +112,9 @@ public class GenreFilterActivity extends AppCompatActivity {
 
         @Override
         protected ArrayList<Genres> doInBackground(String... params) {
-            return handler.getAllGenres();
+            //return handler.getAllGenres();
+            return null;
+            // TODO: 04.10.16 fix
         }
 
         @Override

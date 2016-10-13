@@ -1,25 +1,18 @@
 package com.realjamapps.yamusicapp.models;
 
-import java.io.Serializable;
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
-public class Genres implements Serializable {
+public class Genres { //extends RealmObject {
 
-    private static final long serialVersionUID = 1L;
-
-    private boolean isSelected;
-
+    //@PrimaryKey
     private int id;
     private String name;
+    private boolean isSelected;
 
-    /**
-     * Create empty constructor
-     * */
     public Genres() {
     }
 
-    /**
-     * Create normal constructor
-     * */
     public Genres(int _genresID, String _genresName) {
         this.id = _genresID;
         this.name = _genresName;
@@ -57,5 +50,13 @@ public class Genres implements Serializable {
 
     public void setSelected(boolean isSelected) {
         this.isSelected = isSelected;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

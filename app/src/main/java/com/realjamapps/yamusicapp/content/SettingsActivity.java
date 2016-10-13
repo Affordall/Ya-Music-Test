@@ -12,7 +12,7 @@ import android.widget.Switch;
 import com.realjamapps.yamusicapp.R;
 import com.realjamapps.yamusicapp.utils.Utils;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -21,8 +21,8 @@ public class SettingsActivity extends AppCompatActivity {
     int checkedNotifyIndex;
     public static final String KEY_SWITCH_NOTIFY_INDEX = "SAVED_SWITCH_NOTIFY_INDEX";
 
-    @Bind(R.id.switch_splash_screen) Switch mSwitchSplash;
-    @Bind(R.id.toolbar) Toolbar mToolbar;
+    @BindView(R.id.switch_splash_screen) Switch mSwitchSplash;
+    @BindView(R.id.toolbar) Toolbar mToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,17 +32,13 @@ public class SettingsActivity extends AppCompatActivity {
 
         setUpSupportActionBar();
 
-        mSwitchSplash.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
-                if (isChecked) {
-                    checkedNotifyIndex = 1;
-                } else {
-                    checkedNotifyIndex = 0;
-                }
-                SavePreferences(KEY_SWITCH_NOTIFY_INDEX, checkedNotifyIndex);
+        mSwitchSplash.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                checkedNotifyIndex = 1;
+            } else {
+                checkedNotifyIndex = 0;
             }
+            SavePreferences(KEY_SWITCH_NOTIFY_INDEX, checkedNotifyIndex);
         });
 
         LoadPreferences();

@@ -5,18 +5,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.TextView;
 
 import com.realjamapps.yamusicapp.R;
 import com.realjamapps.yamusicapp.models.Genres;
 
 import java.util.ArrayList;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
 
-
-public class GenresListViewAdapter extends RecyclerView.Adapter<GenresListViewAdapter.ViewHolder> {
+public class GenresListViewAdapter extends RecyclerView.Adapter<GenresViewHolder> {
 
     private ArrayList<Genres> gList;
 
@@ -32,16 +28,16 @@ public class GenresListViewAdapter extends RecyclerView.Adapter<GenresListViewAd
     }
 
     @Override
-    public GenresListViewAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
+    public GenresViewHolder onCreateViewHolder(ViewGroup parent,
                                                              int viewType) {
         View itemLayoutView = LayoutInflater.from(parent.getContext()).inflate(
                 R.layout.filter_genre, null);
 
-        return new ViewHolder(itemLayoutView);
+        return new GenresViewHolder(itemLayoutView);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder viewHolder, int position) {
+    public void onBindViewHolder(final GenresViewHolder viewHolder, int position) {
 
         final int pos = position;
 
@@ -51,14 +47,11 @@ public class GenresListViewAdapter extends RecyclerView.Adapter<GenresListViewAd
 
         viewHolder.chkSelected.setTag(gList.get(position));
 
-        viewHolder.chkSelected.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                CheckBox cb = (CheckBox) v;
-                Genres contact = (Genres) cb.getTag();
-
-                contact.setSelected(cb.isChecked());
-                gList.get(pos).setSelected(cb.isChecked());
-            }
+        viewHolder.chkSelected.setOnClickListener(v -> {
+            CheckBox cb = (CheckBox) v;
+            Genres contact = (Genres) cb.getTag();
+            contact.setSelected(cb.isChecked());
+            gList.get(pos).setSelected(cb.isChecked());
         });
 
     }
@@ -66,17 +59,6 @@ public class GenresListViewAdapter extends RecyclerView.Adapter<GenresListViewAd
     @Override
     public int getItemCount() {
         return gList.size();
-    }
-
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-
-        @Bind(R.id.tvName) TextView tvName;
-        @Bind(R.id.chkSelected) CheckBox chkSelected;
-
-        public ViewHolder(View itemLayoutView) {
-            super(itemLayoutView);
-            ButterKnife.bind(this, itemLayoutView);
-        }
     }
 
     public ArrayList<Genres> getGenresList() {

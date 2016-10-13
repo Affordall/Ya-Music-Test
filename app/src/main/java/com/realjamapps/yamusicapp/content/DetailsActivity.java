@@ -13,18 +13,21 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.realjamapps.yamusicapp.R;
-import com.realjamapps.yamusicapp.database.DatabaseHandler;
+import com.realjamapps.yamusicapp.database.sql.DatabaseHandler;
 import com.realjamapps.yamusicapp.models.Performer;
+import com.realjamapps.yamusicapp.repository.impl.sql.PerformersSqlRepository;
+import com.realjamapps.yamusicapp.specifications.impl.sql.SqlSinglePerformerByIdSpecification;
 import com.realjamapps.yamusicapp.utils.Utils;
 
 import java.io.InputStream;
 import java.util.List;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class DetailsActivity extends AppCompatActivity {
@@ -38,11 +41,12 @@ public class DetailsActivity extends AppCompatActivity {
     private String performerName;
     private String tracksAlbumsString;
 
-    @Bind(R.id.toolbar) Toolbar mToolbar;
-    @Bind(R.id.iv_image_details) SimpleDraweeView draweeView;
-    @Bind(R.id.tv_details_genres) TextView mGenres;
-    @Bind(R.id.tv_details_description) TextView mDescription;
-    @Bind(R.id.tv_details_tracks_and_albums) TextView mTracksAndAlbums;
+    @BindView(R.id.toolbar) Toolbar mToolbar;
+    //@BindView(R.id.iv_image_details) SimpleDraweeView draweeView;
+    @BindView(R.id.iv_image_details) ImageView draweeView;
+    @BindView(R.id.tv_details_genres) TextView mGenres;
+    @BindView(R.id.tv_details_description) TextView mDescription;
+    @BindView(R.id.tv_details_tracks_and_albums) TextView mTracksAndAlbums;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +59,6 @@ public class DetailsActivity extends AppCompatActivity {
         gotId = 0;
         gotId = getIntent().getIntExtra(EXTRA_PARAM_ID, 0);
 
-        assert draweeView != null;
         draweeView.setDrawingCacheEnabled(true);
 
         handler = DatabaseHandler.getInstance(this);
@@ -81,7 +84,8 @@ public class DetailsActivity extends AppCompatActivity {
         @Override
         protected Performer doInBackground(String... value) {
             String identifier = value[0];
-            return handler.getSinglePerformer(Integer.parseInt(identifier));
+            return new PerformersSqlRepository(handler).query(new SqlSinglePerformerByIdSpecification(Integer.parseInt(identifier))).get(0);
+            //return handler.getSinglePerformer(Integer.parseInt(identifier));
         }
 
         @Override

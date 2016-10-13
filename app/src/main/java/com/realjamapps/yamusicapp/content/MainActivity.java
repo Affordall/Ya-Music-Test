@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.Nullable;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -25,19 +24,24 @@ import android.widget.Toast;
 
 import com.realjamapps.yamusicapp.R;
 import com.realjamapps.yamusicapp.adapters.MainGridAdapter;
-import com.realjamapps.yamusicapp.database.DatabaseHandler;
+import com.realjamapps.yamusicapp.app.YaMusicApp;
+import com.realjamapps.yamusicapp.database.sql.DatabaseHandler;
+import com.realjamapps.yamusicapp.events.UpdateEvent;
 import com.realjamapps.yamusicapp.intro.FancyAppIntro;
-import com.realjamapps.yamusicapp.listeners.PerformersListener;
 import com.realjamapps.yamusicapp.models.Performer;
 import com.realjamapps.yamusicapp.receivers.DownloadResultReceiver;
+import com.realjamapps.yamusicapp.repository.impl.sql.PerformersSqlRepository;
 import com.realjamapps.yamusicapp.services.DownloadServiceIntent;
+import com.realjamapps.yamusicapp.specifications.impl.sql.SqlAllPerformersSortedByNameSpecification;
 import com.realjamapps.yamusicapp.utils.DividerItemDecoration;
 import com.realjamapps.yamusicapp.utils.Utils;
-import com.realjamapps.yamusicapp.utils.YaMusicApp;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import dmax.dialog.SpotsDialog;
 
@@ -54,9 +58,11 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
     private ArrayList<Performer> mPerformerList;
     private DownloadResultReceiver mReceiver;
 
-    @Bind(R.id.toolbar) Toolbar toolbar;
-    @Bind(R.id.rc_list) RecyclerView mRecyclerView;
-    @Bind(R.id.swipeContainer) SwipeRefreshLayout mSwipeRefreshLayout;
+    private MainGridAdapter.OnItemClickListener onItemClickListener;
+
+    @BindView(R.id.toolbar) Toolbar toolbar;
+    @BindView(R.id.rc_list) RecyclerView mRecyclerView;
+    @BindView(R.id.swipeContainer) SwipeRefreshLayout mSwipeRefreshLayout;
 
 //    @Nullable
 //    MainGridAdapter.OnItemClickListener onItemClickListener = new MainGridAdapter.OnItemClickListener() {
@@ -69,17 +75,21 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
 //        }
 //    };
 
-    @Nullable
-    MainGridAdapter.OnItemClickListener onItemClickListener = (v, position) -> {
-
-        Intent transitionIntent = new Intent(MainActivity.this, DetailsActivity.class);
-        transitionIntent.putExtra(DetailsActivity.EXTRA_PARAM_ID, position);
-        startActivity(transitionIntent);
-    };
+//    @Nullable
+//    MainGridAdapter.OnItemClickListener onItemClickListener = (v, position) -> {
+//
+//        Intent transitionIntent = new Intent(MainActivity.this, DetailsActivity.class);
+//        transitionIntent.putExtra(DetailsActivity.EXTRA_PARAM_ID, position);
+//        startActivity(transitionIntent);
+//    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
+        try {
+            EventBus.getDefault().register(this);
+        } catch (Throwable t){
+            //this may crash if registration did not go through. just be safe
+        }
         getAllSharedPreferences();
 
         super.onCreate(savedInstanceState);
@@ -88,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
 
         setSupportActionBar(toolbar);
 
-        showIntroDependingByIntroIndexVariable();
+        //showIntroDependingByIntroIndexVariable();
 
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this, null));
 
@@ -99,9 +109,12 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
 
         mPerformerList = Utils.newInstancePerformer();
 
-        mAdapter = new MainGridAdapter(getApplicationContext(), mPerformerList);
+        onItemClickListener =
+                (view1, position) -> onItemClick(mAdapter.getArticle(position));
+
+        mAdapter = new MainGridAdapter(getApplicationContext(), mPerformerList, onItemClickListener);
         mRecyclerView.setAdapter(mAdapter);
-        mAdapter.setOnItemClickListener(onItemClickListener);
+        mRecyclerView.addOnItemTouchListener(mAdapter);
 
         handler = DatabaseHandler.getInstance(this);
 
@@ -110,18 +123,24 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
 
 
 
-        if (isDBempty()) {
-            getArtistAndRefreshAdapter();
-        } else {
+//        if (!isDBempty()) {
+//            getArtistAndRefreshAdapter();
+//        } else {
             checkInternetAndStartService();
-        }
+//        }
 
         initializeSwipeRefreshLayout();
 
     }
 
+    private void onItemClick(Performer performer) {
+        Intent transitionIntent = new Intent(MainActivity.this, DetailsActivity.class);
+        transitionIntent.putExtra(DetailsActivity.EXTRA_PARAM_ID, performer.getmId());
+        startActivity(transitionIntent);
+    }
+
     private boolean isDBempty() {
-        return handler.getPerformersCount() !=0;
+        return handler.getPerformersCount() == 0;
     }
 
     private void initializeSwipeRefreshLayout() {
@@ -149,12 +168,12 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
 
     private void checkInternetAndStartService() {
         if (Utils.isNetworkUnavailable()) {
-            if (isDBempty()) {
-                handler.deleteAllDBs();
-//                if (mAdapter != null) {
-//                    mAdapter.clear();
-//                }
-            }
+//            if (isDBempty()) {
+//                handler.deleteAllDBs();
+////                if (mAdapter != null) {
+////                    mAdapter.clear();
+////                }
+//            }
             Utils.createIntentStartService(this, mReceiver);
         } else {
             Toast.makeText(this, getString(R.string.internet_is_off), Toast.LENGTH_SHORT).show();
@@ -162,8 +181,35 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
     }
 
     private void getArtistAndRefreshAdapter() {
-            mPerformerList = handler.getAllPerformers();
+            //mPerformerList = handler.getAllPerformers();
             mAdapter.refresh(mPerformerList);
+    }
+
+    @Subscribe
+    private void onRefresh(UpdateEvent event) {
+        mPerformerList = event.list;
+        mAdapter.refresh(mPerformerList);
+    }
+
+    @Override
+    public void onStart() {
+
+        super.onStart();
+    }
+
+    @Override
+    protected void onDestroy() {
+        try {
+            EventBus.getDefault().unregister(this);
+        } catch (Throwable t){
+            //this may crash if registration did not go through. just be safe
+        }
+        super.onDestroy();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
     }
 
     @Override
@@ -171,10 +217,10 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
         switch (resultCode) {
             case DownloadServiceIntent.STATUS_RUNNING:
 
-                 dialog = new SpotsDialog(MainActivity.this, R.style.CustomProgressDialogStyle);
-                 dialog.show();
+//                 dialog = new SpotsDialog(MainActivity.this, R.style.CustomProgressDialogStyle);
+//                 dialog.show();
 
-                setRecyclerViewVisibility(false);
+                //setRecyclerViewVisibility(false);
 
                 break;
             case DownloadServiceIntent.STATUS_FINISHED:
@@ -186,23 +232,24 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
                  * on Middle-End devices: (AT 87ms) vs (Direct 77ms)
                  * on Low-End devices: (AT 407ms) vs (Direct 211ms)*/
 
-                ArrayList<Performer> itemList = handler.getAllPerformers();
-                mAdapter.refresh(itemList);
+                //ArrayList<Performer> itemList = handler.getAllPerformers();
+                mPerformerList = (ArrayList<Performer>) new PerformersSqlRepository(handler).query(new SqlAllPerformersSortedByNameSpecification());
+                mAdapter.refresh(mPerformerList);
 
-                if (dialog != null) {
-                    dialog.dismiss();
-                }
+//                if (dialog != null) {
+//                    dialog.dismiss();
+//                }
 
-                setRecyclerViewVisibility(true);
+                //setRecyclerViewVisibility(true);
 
                 Toast.makeText(MainActivity.this, getString(R.string.update_complete), Toast.LENGTH_LONG).show();
                 break;
             case DownloadServiceIntent.STATUS_ERROR:
-                if (dialog != null) {
-                    dialog.dismiss();
-                }
+//                if (dialog != null) {
+//                    dialog.dismiss();
+//                }
 
-                setRecyclerViewVisibility(true);
+                //setRecyclerViewVisibility(true);
 
                 String error = resultData.getString(Intent.EXTRA_TEXT);
                 Toast.makeText(this, error, Toast.LENGTH_LONG).show();
@@ -249,13 +296,13 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
         }
     }
 
-    private void setRecyclerViewVisibility(boolean shouldVisible) {
-        if (shouldVisible) {
-            mRecyclerView.setVisibility(View.VISIBLE);
-        } else {
-            mRecyclerView.setVisibility(View.INVISIBLE);
-        }
-    }
+//    private void setRecyclerViewVisibility(boolean shouldVisible) {
+//        if (shouldVisible) {
+//            mRecyclerView.setVisibility(View.VISIBLE);
+//        } else {
+//            mRecyclerView.setVisibility(View.INVISIBLE);
+//        }
+//    }
 
     @Override
     protected void onResume() {
@@ -270,12 +317,6 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
         super.onPause();
         YaMusicApp.activityPaused();
         //mReceiver.setReceiver(null);
-    }
-
-    @Override
-    protected void onStop() {
-        System.gc();
-        super.onStop();
     }
 
     @Override
@@ -313,7 +354,9 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
 
         @Override
         protected ArrayList<Performer> doInBackground(String... params) {
-            return handler.getAllPerformersByGenre(params);
+            // TODO: 04.10.16 fix
+            return null;
+            //return handler.getAllPerformersByGenre(params);
         }
 
         @Override
@@ -331,8 +374,8 @@ public class MainActivity extends AppCompatActivity implements DownloadResultRec
         SelectPerformerByGenreTask selectPerformerByGenreTask = new SelectPerformerByGenreTask();
 
         if (resultCode == RESULT_GETALL) {
-            mPerformerList = null;
-            getArtistAndRefreshAdapter();
+            //mPerformerList = null;
+            //getArtistAndRefreshAdapter();
         }
 
         if (resultCode == RESULT_OK) {
