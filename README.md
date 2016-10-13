@@ -2,6 +2,8 @@
 
 A test application for [Yandex Mobile Development School 2016](https://academy.yandex.ru/events/mobdev/msk-2016/).
 
+[![Build Status](https://travis-ci.org/geaden/yandex-mobilization.svg?branch=master)](https://travis-ci.org/Affordall/Ya-Music-Test)
+
 ## Features:
 * Displaying a list of artists loaded from URL provided by test task description - [OkHttp](http://square.github.io/okhttp/)
 * Loading images and creating cache - [Fresco](http://frescolib.org/)
