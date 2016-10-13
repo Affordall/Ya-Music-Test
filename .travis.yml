@@ -1,0 +1,33 @@
+language: android
+jdk: oraclejdk8
+
+sudo: required
+
+android:
+  components:
+    - tools
+    - platform-tools
+    - build-tools-24.0.2
+    - android-24
+    # Support library
+    - extra-android-support
+    # Latest artifacts in local repository
+    - extra-android-m2repository
+    
+cache:
+  directories:
+    - ${TRAVIS_BUILD_DIR}/gradle/caches/
+    - ${TRAVIS_BUILD_DIR}/gradle/wrapper/dists/
+    
+before_script:
+  - emulator -avd test -no-skin -no-audio -no-window &
+  - android-wait-for-emulator
+  - adb devices
+
+script:
+  - ./gradlew build -PdisablePreDex
+  - android-wait-for-emulator
+  
+after_failure:
+  # Make a screenshot
+  - adb shell screencap -p | sed 's/\r$//' >  /media/affy/Other/Workspaces/workspace/YaMusicApp/app/build/reports/screen.png
